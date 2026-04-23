@@ -1,55 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkPredict Dashboard</title>
     <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
+<body class="dashboard-body">
+    <nav class="navbar">
+        <div class="nav-brand">ParkPredict <span>MMU</span></div>
+        <div class="nav-user" id="display-user">FCI Front-End Lead</div>
+    </nav>
 
-<header>
-    <h1>Dashboard</h1>
-</header>
+    <div class="main-layout">
+        <aside class="sidebar">
+            <div class="glass-card">
+                <h3>Quick Action</h3>
+                <select id="zone" class="tech-select">
+                    <option value="FCI">FCI Lot</option>
+                    <option value="FOM">FOM Lot</option>
+                    <option value="DTC">Grand Hall (DTC)</option>
+                </select>
+                <button class="btn btn-checkin" onclick="checkin()">CHECK IN</button>
+                <button class="btn btn-checkout" onclick="checkout()">CHECK OUT</button>
+                <input type="text" id="log_id" placeholder="Log ID (for Check-out)" class="mini-input">
+            </div>
+        </aside>
 
-<div class="container">
+        <main class="content-grid">
+            <div class="glass-card prediction-card">
+                <h3>Current Probability</h3>
+                <div class="big-percent" id="rec">72%</div>
+                <p>Chance of finding a spot now</p>
+                <button class="btn-refresh" onclick="getRecommendation()">REFRESH PREDICTION</button>
+            </div>
 
-    <div class="card">
-        <h3>Parking Status</h3>
-        <button onclick="getStatus()">Refresh</button>
-        <pre id="status"></pre>
+            <div class="glass-card chart-container">
+                <h3>Parking Usage Trends</h3>
+                <canvas id="peakChart"></canvas>
+            </div>
+
+            <div class="glass-card history-list">
+                <h3>Live Zone Status</h3>
+                <div id="status" class="status-monitor">
+                    </div>
+            </div>
+        </main>
     </div>
 
-    <div class="card">
-        <h3>Recommendation</h3>
-        <button onclick="getRecommendation()">Get Recommendation</button>
-        <p id="rec"></p>
-    </div>
-
-    <div class="card">
-        <h3>Check In</h3>
-        <input id="zone" placeholder="Zone ID">
-        <button onclick="checkin()">Check In</button>
-    </div>
-
-    <div class="card">
-        <h3>Check Out</h3>
-        <input id="log_id" placeholder="Log ID">
-        <button onclick="checkout()">Check Out</button>
-    </div>
-
-    <div class="card">
-        <h3>User History</h3>
-        <button onclick="getHistory()">Load History</button>
-        <pre id="history"></pre>
-    </div>
-
-    <div class="card">
-        <h3>Analytics</h3>
-        <button onclick="getAnalytics()">Load Analytics</button>
-        <pre id="analytics"></pre>
-    </div>
-
-</div>
-
-<script src="js/dashboard.js"></script>
-
+    <script src="js/dashboard.js"></script>
+    <script src="js/charts.js"></script>
 </body>
 </html>

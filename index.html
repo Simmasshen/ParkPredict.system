@@ -1,24 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkPredict | MMU Cyberjaya</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
+<body class="hero-bg">
+    <div class="glass-container">
+        <header>
+            <h1 class="glow-text">ParkPredict 🚗</h1>
+            <p>Smart Campus Tracking for MMU Cyberjaya</p>
+        </header>
 
-<header>
-    <h1>🚗 ParkPredict</h1>
-</header>
-
-<div class="container">
-    <div class="card">
-        <h2>Welcome</h2>
-        <p>Smart Parking System</p>
-
-        <a href="login.html"><button>Login</button></a>
-        <a href="register.html"><button>Register</button></a>
-        <a href="dashboard.html"><button>Dashboard</button></a>
+        <div class="auth-box">
+            <div class="input-group">
+                <input type="text" id="username" placeholder="MMU Student ID" required>
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+            
+            <button class="btn btn-primary" onclick="login()">ENTER DASHBOARD</button>
+            <div class="auth-links">
+                <a href="register.html">New Student? Register Here</a>
+            </div>
+            <p id="msg" class="error-msg"></p>
+        </div>
     </div>
-</div>
 
+    <script src="js/auth.js"></script>
 </body>
 </html>
