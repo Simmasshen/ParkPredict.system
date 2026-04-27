@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register – ParkPredict</title>
+  <link rel="stylesheet" href="../static/css/style.css"/>
+  <link rel="stylesheet" href="../static/css/auth.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body class="auth-body">
+
+<div class="auth-layout">
+
+  <!-- LEFT PANEL – Branding -->
+  <div class="auth-left">
+    <div class="auth-left-inner">
+
+      <div class="auth-logo">
+        <span class="logo-pp">PARK</span><span class="logo-predict">PREDICT</span>
+      </div>
+      <div class="auth-tagline">Join thousands of<br>MMU students parking smarter</div>
+
+      <div class="auth-steps">
+        <div class="auth-step">
+          <div class="step-num">01</div>
+          <div>
+            <div class="af-title">Create your account</div>
+            <div class="af-sub">Register with your MMU student ID</div>
+          </div>
+        </div>
+        <div class="auth-step-line"></div>
+        <div class="auth-step">
+          <div class="step-num">02</div>
+          <div>
+            <div class="af-title">Add your vehicle</div>
+            <div class="af-sub">Register your car or motorcycle plate</div>
+          </div>
+        </div>
+        <div class="auth-step-line"></div>
+        <div class="auth-step">
+          <div class="step-num">03</div>
+          <div>
+            <div class="af-title">Park smarter</div>
+            <div class="af-sub">Check availability, predict & check in/out</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-live-strip">
+        <span class="live-dot"></span>
+        <span class="live-text">LIVE</span>
+        <span class="auth-live-stat" id="liveAvail">-- slots available across campus</span>
+      </div>
+
+    </div>
+    <div class="auth-bg-grid"></div>
+    <div class="auth-deco">
+      <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg" opacity="0.07">
+        <rect x="10"  y="10"  width="50" height="80" rx="4" fill="#3b82f6"/>
+        <rect x="70"  y="10"  width="50" height="80" rx="4" fill="#22c55e"/>
+        <rect x="130" y="10"  width="50" height="80" rx="4" fill="#22c55e"/>
+        <rect x="190" y="10"  width="50" height="80" rx="4" fill="#f59e0b"/>
+        <rect x="250" y="10"  width="40" height="80" rx="4" fill="#22c55e"/>
+        <rect x="10"  y="110" width="50" height="80" rx="4" fill="#22c55e"/>
+        <rect x="70"  y="110" width="50" height="80" rx="4" fill="#22c55e"/>
+        <rect x="130" y="110" width="50" height="80" rx="4" fill="#ef4444"/>
+        <rect x="190" y="110" width="50" height="80" rx="4" fill="#22c55e"/>
+        <rect x="250" y="110" width="40" height="80" rx="4" fill="#3b82f6"/>
+        <text x="35"  y="60" text-anchor="middle" font-size="28" fill="white" font-family="sans-serif" font-weight="bold">P</text>
+        <text x="155" y="60" text-anchor="middle" font-size="28" fill="white" font-family="sans-serif" font-weight="bold">P</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL – Register Form -->
+  <div class="auth-right">
+    <div class="auth-card auth-card--wide">
+
+      <!-- STEP INDICATOR -->
+      <div class="reg-steps">
+        <div class="reg-step active" id="rstep1">
+          <div class="reg-step-dot">1</div>
+          <div class="reg-step-label">Account</div>
+        </div>
+        <div class="reg-step-bar"></div>
+        <div class="reg-step" id="rstep2">
+          <div class="reg-step-dot">2</div>
+          <div class="reg-step-label">Profile</div>
+        </div>
+        <div class="reg-step-bar"></div>
+        <div class="reg-step" id="rstep3">
+          <div class="reg-step-dot">3</div>
+          <div class="reg-step-label">Vehicle</div>
+        </div>
+      </div>
+
+      <!-- STEP 1 – Account Info -->
+      <div class="reg-panel" id="panel1">
+        <div class="auth-card-header">
+          <div class="auth-card-label">STEP 1 OF 3</div>
+          <h1 class="auth-card-title">Account Details</h1>
+          <p class="auth-card-sub">Set up your login credentials</p>
+        </div>
+        <div class="auth-form">
+          <div class="form-group">
+            <label>MMU Student ID</label>
+            <div class="input-wrap">
+              <span class="input-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              </span>
+              <input type="text" id="regStudentId" placeholder="e.g. 1221103456" maxlength="12"/>
+            </div>
+            <span class="field-hint">Your 10-digit MMU student number</span>
+          </div>
+          <div class="form-group">
+            <label>MMU Email</label>
+            <div class="input-wrap">
+              <span class="input-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </span>
+              <input type="email" id="regEmail" placeholder="student@student.mmu.edu.my"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Password</label>
+              <div class="input-wrap">
+                <span class="input-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+                <input type="password" id="regPw" placeholder="Min. 8 characters" oninput="checkPwStrength(this.value)"/>
+                <button class="pw-toggle" type="button" onclick="togglePw('regPw', this)" tabindex="-1">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+              <div class="pw-strength" id="pwStrength">
+                <div class="pw-bar"><div class="pw-fill" id="pwFill"></div></div>
+                <span class="pw-label" id="pwLabel"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Confirm Password</label>
+              <div class="input-wrap">
+                <span class="input-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+                <input type="password" id="regPwConfirm" placeholder="Re-enter password"/>
+                <button class="pw-toggle" type="button" onclick="togglePw('regPwConfirm', this)" tabindex="-1">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="auth-error" id="regError1" style="display:none"></div>
+          <button class="btn-primary btn-auth" onclick="nextStep(1)">
+            Continue <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2 – Personal Info -->
+      <div class="reg-panel" id="panel2" style="display:none">
+        <div class="auth-card-header">
+          <div class="auth-card-label">STEP 2 OF 3</div>
+          <h1 class="auth-card-title">Your Profile</h1>
+          <p class="auth-card-sub">Tell us a bit about yourself</p>
+        </div>
+        <div class="auth-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Full Name</label>
+              <div class="input-wrap">
+                <span class="input-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                <input type="text" id="regName" placeholder="e.g. Ahmad Zulkifli bin Razak"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <div class="input-wrap">
+                <span class="input-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12 19.79 19.79 0 0 1 1.08 3.38 2 2 0 0 1 3.06 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16z"/></svg>
+                </span>
+                <input type="tel" id="regPhone" placeholder="e.g. 01X-XXXXXXX"/>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Faculty</label>
+              <div class="input-wrap input-wrap--select">
+                <span class="input-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                </span>
+                <select id="regFaculty">
+                  <option value="">— Select Faculty —</option>
+                  <option>Faculty of Computing & Informatics (FCI)</option>
+                  <option>Faculty of Management (FOM)</option>
+                  <option>Faculty of Engineering & Technology (FOE)</option>
+                  <option>Faculty of Business (FOB)</option>
+                  <option>Faculty of Applied Communication (FAC)</option>
+                  <option>Faculty of Cinematic Arts (FCA)</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Year of Study</label>
+              <div class="input-wrap input-wrap--select">
+                <span class="input-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </span>
+                <select id="regYear">
+                  <option value="">— Select Year —</option>
+                  <option>Year 1</option>
+                  <option>Year 2</option>
+                  <option>Year 3</option>
+                  <option>Year 4</option>
+                  <option>Postgraduate</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="auth-error" id="regError2" style="display:none"></div>
+          <div class="form-row form-row--btn">
+            <button class="btn-outline btn-auth" onclick="prevStep(2)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back
+            </button>
+            <button class="btn-primary btn-auth" onclick="nextStep(2)">
+              Continue <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 – Vehicle Info -->
+      <div class="reg-panel" id="panel3" style="display:none">
+        <div class="auth-card-header">
+          <div class="auth-card-label">STEP 3 OF 3</div>
+          <h1 class="auth-card-title">Vehicle Details</h1>
+          <p class="auth-card-sub">Register your vehicle for check-in/out</p>
+        </div>
+        <div class="auth-form">
+          <div class="form-group">
+            <label>Vehicle Type</label>
+            <div class="vehicle-type-picker" id="vehicleTypePicker">
+              <div class="vtype-card active" data-type="car" onclick="selectVType(this)">
+                <span class="vtype-icon">🚗</span>
+                <span class="vtype-name">Car</span>
+              </div>
+              <div class="vtype-card" data-type="motorcycle" onclick="selectVType(this)">
+                <span class="vtype-icon">🏍</span>
+                <span class="vtype-name">Motorcycle</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Vehicle Plate Number</label>
+              <div class="input-wrap">
+                <span class="input-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="22" height="13" rx="2"/><line x1="1" y1="11" x2="23" y2="11"/></svg>
+                </span>
+                <input type="text" id="regPlate" placeholder="e.g. WXY 1234" style="text-transform:uppercase"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Vehicle Color</label>
+              <div class="input-wrap">
+                <span class="input-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+                </span>
+                <input type="text" id="regColor" placeholder="e.g. Silver, Black, Red"/>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Vehicle Model <span class="optional">(optional)</span></label>
+            <div class="input-wrap">
+              <span class="input-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/></svg>
+              </span>
+              <input type="text" id="regModel" placeholder="e.g. Perodua Myvi, Honda Wave"/>
+            </div>
+          </div>
+
+          <label class="checkbox-label" style="margin-top:0.5rem">
+            <input type="checkbox" id="termsCheck"/>
+            <span class="checkmark"></span>
+            I agree to the <a href="#" class="auth-link">Terms of Use</a> and <a href="#" class="auth-link">Privacy Policy</a>
+          </label>
+
+          <div class="auth-error" id="regError3" style="display:none"></div>
+
+          <div class="form-row form-row--btn" style="margin-top:0.5rem">
+            <button class="btn-outline btn-auth" onclick="prevStep(3)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back
+            </button>
+            <button class="btn-primary btn-auth" onclick="doRegister()">
+              Create Account ✦
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUCCESS STATE -->
+      <div class="reg-panel" id="panelSuccess" style="display:none">
+        <div class="reg-success">
+          <div class="success-icon">🎉</div>
+          <h2>Account Created!</h2>
+          <p>Welcome to ParkPredict. Your account has been successfully registered.</p>
+          <div class="success-detail" id="successDetail"></div>
+          <a href="index.html" class="btn-primary btn-auth" style="margin-top:1.5rem;display:inline-flex;justify-content:center">
+            Go to Dashboard →
+          </a>
+        </div>
+      </div>
+
+      <div class="auth-footer-link" id="loginLink">
+        Already have an account? <a href="login.html">Sign in →</a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="../static/js/data.js"></script>
+<script src="../static/js/auth.js"></script>
+</body>
+</html>
