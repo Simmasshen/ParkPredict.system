@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login – ParkPredict</title>
+  <link rel="stylesheet" href="../static/css/style.css"/>
+  <link rel="stylesheet" href="../static/css/auth.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body class="auth-body">
+
+<div class="auth-layout">
+
+  <!-- LEFT PANEL – Branding -->
+  <div class="auth-left">
+    <div class="auth-left-inner">
+
+      <div class="auth-logo">
+        <span class="logo-pp">PARK</span><span class="logo-predict">PREDICT</span>
+      </div>
+      <div class="auth-tagline">Smart Campus Parking<br>for MMU Cyberjaya</div>
+
+      <div class="auth-features">
+        <div class="auth-feature">
+          <span class="auth-feature-icon">🟢</span>
+          <div>
+            <div class="af-title">Live Availability</div>
+            <div class="af-sub">See open slots in real-time across all 7 zones</div>
+          </div>
+        </div>
+        <div class="auth-feature">
+          <span class="auth-feature-icon">🔮</span>
+          <div>
+            <div class="af-title">AI Predictions</div>
+            <div class="af-sub">Know the best time to arrive before you leave home</div>
+          </div>
+        </div>
+        <div class="auth-feature">
+          <span class="auth-feature-icon">📊</span>
+          <div>
+            <div class="af-title">Peak Hour Analytics</div>
+            <div class="af-sub">View parking trends and busy hour heatmaps</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini live status -->
+      <div class="auth-live-strip">
+        <span class="live-dot"></span>
+        <span class="live-text">LIVE</span>
+        <span class="auth-live-stat" id="liveAvail">-- slots available across campus</span>
+      </div>
+
+    </div>
+
+    <!-- Decorative grid lines -->
+    <div class="auth-bg-grid"></div>
+    <!-- Decorative parking slots illustration -->
+    <div class="auth-deco">
+      <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg" opacity="0.07">
+        <rect x="10"  y="10"  width="50" height="80" rx="4" fill="#3b82f6"/>
+        <rect x="70"  y="10"  width="50" height="80" rx="4" fill="#3b82f6"/>
+        <rect x="130" y="10"  width="50" height="80" rx="4" fill="#22c55e"/>
+        <rect x="190" y="10"  width="50" height="80" rx="4" fill="#22c55e"/>
+        <rect x="250" y="10"  width="40" height="80" rx="4" fill="#ef4444"/>
+        <rect x="10"  y="110" width="50" height="80" rx="4" fill="#22c55e"/>
+        <rect x="70"  y="110" width="50" height="80" rx="4" fill="#f59e0b"/>
+        <rect x="130" y="110" width="50" height="80" rx="4" fill="#22c55e"/>
+        <rect x="190" y="110" width="50" height="80" rx="4" fill="#ef4444"/>
+        <rect x="250" y="110" width="40" height="80" rx="4" fill="#22c55e"/>
+        <!-- "P" text inside some slots -->
+        <text x="35"  y="60"  text-anchor="middle" font-size="28" fill="white" font-family="sans-serif" font-weight="bold">P</text>
+        <text x="95"  y="60"  text-anchor="middle" font-size="28" fill="white" font-family="sans-serif" font-weight="bold">P</text>
+        <text x="155" y="60"  text-anchor="middle" font-size="28" fill="white" font-family="sans-serif" font-weight="bold">P</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL – Login Form -->
+  <div class="auth-right">
+    <div class="auth-card">
+
+      <div class="auth-card-header">
+        <div class="auth-card-label">WELCOME BACK</div>
+        <h1 class="auth-card-title">Sign In</h1>
+        <p class="auth-card-sub">Access your ParkPredict account</p>
+      </div>
+
+      <div class="auth-form" id="loginForm">
+
+        <div class="form-group">
+          <label>Student ID / Email</label>
+          <div class="input-wrap">
+            <span class="input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <input type="text" id="loginId" placeholder="e.g. 1221103456 or student@mmu.edu.my" autocomplete="username"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <input type="password" id="loginPw" placeholder="Enter your password" autocomplete="current-password"/>
+            <button class="pw-toggle" type="button" onclick="togglePw('loginPw', this)" tabindex="-1">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="auth-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="rememberMe"/>
+            <span class="checkmark"></span>
+            Remember me
+          </label>
+          <a href="#" class="auth-link">Forgot password?</a>
+        </div>
+
+        <div class="auth-error" id="loginError" style="display:none"></div>
+
+        <button class="btn-primary btn-auth" onclick="doLogin()">
+          Sign In
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+
+        <div class="auth-divider"><span>or</span></div>
+
+        <button class="btn-outline btn-auth btn-mmu" onclick="doGuestLogin()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Continue as Guest
+        </button>
+
+      </div>
+
+      <div class="auth-footer-link">
+        Don't have an account? <a href="register.html">Create one →</a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="../static/js/data.js"></script>
+<script src="../static/js/auth.js"></script>
+</body>
+</html>

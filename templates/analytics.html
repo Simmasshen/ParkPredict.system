@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Analytics – ParkPredict</title>
+  <link rel="stylesheet" href="../static/css/style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-logo">
+    <span class="logo-pp">PARK</span><span class="logo-predict">PREDICT</span>
+    <span class="nav-badge">MMU Cyberjaya</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="index.html">Dashboard</a></li>
+    <li><a href="map.html">Campus Map</a></li>
+    <li><a href="checkin.html">Check In/Out</a></li>
+    <li><a href="analytics.html" class="active">Analytics</a></li>
+    <li><a href="predict.html">Predict</a></li>
+  </ul>
+  <a href="login.html" class="btn-outline" style="font-size:0.82rem;padding:6px 14px;margin-left:auto;flex-shrink:0">Login</a>
+  <div class="nav-time" id="navTime"></div>
+</nav>
+
+<div class="page-header">
+  <h1>Parking <span>Analytics</span></h1>
+  <p>Data-driven insights into MMU Cyberjaya parking patterns</p>
+</div>
+
+<!-- KPI ROW -->
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="kpi-icon">📊</div>
+    <div class="kpi-val" id="kpiAvg">68%</div>
+    <div class="kpi-label">Avg. Occupancy Today</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">⏱</div>
+    <div class="kpi-val" id="kpiPeak">8–9 AM</div>
+    <div class="kpi-label">Peak Hours</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">🚗</div>
+    <div class="kpi-val" id="kpiSessions">247</div>
+    <div class="kpi-label">Sessions Today</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">⌛</div>
+    <div class="kpi-val" id="kpiDuration">1h 42m</div>
+    <div class="kpi-label">Avg. Duration</div>
+  </div>
+</div>
+
+<div class="analytics-page">
+
+  <!-- HOURLY TREND -->
+  <div class="chart-card chart-card--wide">
+    <div class="chart-card-header">
+      <h3>Hourly Occupancy Today</h3>
+      <div class="chart-tabs">
+        <button class="tab-btn active" onclick="switchDay(this,'today')">Today</button>
+        <button class="tab-btn" onclick="switchDay(this,'yesterday')">Yesterday</button>
+        <button class="tab-btn" onclick="switchDay(this,'average')">Weekly Avg</button>
+      </div>
+    </div>
+    <canvas id="hourlyChart" height="100"></canvas>
+  </div>
+
+  <!-- ZONE COMPARISON -->
+  <div class="chart-card">
+    <div class="chart-card-header">
+      <h3>Zone Comparison</h3>
+    </div>
+    <canvas id="zoneChart" height="160"></canvas>
+  </div>
+
+  <!-- WEEKLY HEATMAP -->
+  <div class="chart-card">
+    <div class="chart-card-header">
+      <h3>Weekly Peak Heatmap</h3>
+    </div>
+    <div class="heatmap" id="heatmap"></div>
+    <div class="heatmap-legend">
+      <span>Low</span>
+      <div class="heatmap-gradient"></div>
+      <span>High</span>
+    </div>
+  </div>
+
+  <!-- DAILY TREND (bar) -->
+  <div class="chart-card chart-card--wide">
+    <div class="chart-card-header">
+      <h3>Daily Sessions This Week</h3>
+    </div>
+    <canvas id="dailyChart" height="100"></canvas>
+  </div>
+
+  <!-- VEHICLE TYPE PIE -->
+  <div class="chart-card chart-card--small">
+    <div class="chart-card-header">
+      <h3>Vehicle Types</h3>
+    </div>
+    <canvas id="vehicleChart" height="200"></canvas>
+  </div>
+
+  <!-- ZONE USAGE PIE -->
+  <div class="chart-card chart-card--small">
+    <div class="chart-card-header">
+      <h3>Zone Usage Share</h3>
+    </div>
+    <canvas id="zoneUsageChart" height="200"></canvas>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div><span class="logo-pp">PARK</span><span class="logo-predict">PREDICT</span><p>Smart parking for MMU Cyberjaya</p></div>
+    <div class="footer-links">
+      <a href="index.html">Dashboard</a><a href="map.html">Campus Map</a>
+      <a href="checkin.html">Check In/Out</a><a href="analytics.html">Analytics</a>
+    </div>
+    <div class="footer-copy">© 2025 ParkPredict · MMU Cyberjaya</div>
+  </div>
+</footer>
+
+<script src="../static/js/data.js"></script>
+<script src="../static/js/analytics.js"></script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Predict – ParkPredict</title>
+  <link rel="stylesheet" href="../static/css/style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-logo">
+    <span class="logo-pp">PARK</span><span class="logo-predict">PREDICT</span>
+    <span class="nav-badge">MMU Cyberjaya</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="index.html">Dashboard</a></li>
+    <li><a href="map.html">Campus Map</a></li>
+    <li><a href="checkin.html">Check In/Out</a></li>
+    <li><a href="analytics.html">Analytics</a></li>
+    <li><a href="predict.html" class="active">Predict</a></li>
+  </ul>
+  <a href="login.html" class="btn-outline" style="font-size:0.82rem;padding:6px 14px;margin-left:auto;flex-shrink:0">Login</a>
+  <div class="nav-time" id="navTime"></div>
+</nav>
+
+<div class="page-header">
+  <h1>Parking <span>Predictor</span></h1>
+  <p>AI-powered probability forecast using historical patterns</p>
+</div>
+
+<div class="predict-page">
+
+  <!-- INPUT PANEL -->
+  <div class="predict-panel">
+    <div class="card-label">INPUTS</div>
+    <h2>Set Parameters</h2>
+
+    <div class="predict-inputs">
+      <div class="form-group">
+        <label>Day of Week</label>
+        <div class="day-picker" id="dayPicker">
+          <button class="day-btn active" data-day="Monday">Mon</button>
+          <button class="day-btn" data-day="Tuesday">Tue</button>
+          <button class="day-btn" data-day="Wednesday">Wed</button>
+          <button class="day-btn" data-day="Thursday">Thu</button>
+          <button class="day-btn" data-day="Friday">Fri</button>
+          <button class="day-btn" data-day="Saturday">Sat</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Time of Arrival</label>
+        <div class="time-slider-wrap">
+          <input type="range" id="timeSlider" min="7" max="20" value="9" oninput="updateTimeDisplay(this.value)"/>
+          <div class="time-slider-label" id="timeSliderLabel">9:00 AM</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Preferred Zone</label>
+        <select id="predictZone">
+          <option value="all">All Zones</option>
+          <option value="A">Zone A – Near FCI</option>
+          <option value="B">Zone B – Top Right</option>
+          <option value="C">Zone C – Left Mid</option>
+          <option value="D">Zone D – Right Mid</option>
+          <option value="E">Zone E – Bottom Left</option>
+          <option value="F">Zone F – Bottom Right</option>
+          <option value="G">Zone G – Multi-Storey</option>
+        </select>
+      </div>
+      <button class="btn-primary btn-big" onclick="runPrediction()">
+        <span>Run Prediction</span>
+        <span class="btn-sparkle">✦</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- RESULTS PANEL -->
+  <div class="predict-results" id="predictResults">
+    <div class="predict-empty">
+      <div class="predict-empty-icon">🔮</div>
+      <div>Set parameters and click <strong>Run Prediction</strong></div>
+    </div>
+  </div>
+
+  <!-- PROBABILITY CHART -->
+  <div class="predict-chart-card" id="predictChartCard" style="display:none">
+    <div class="card-label">PROBABILITY CURVE</div>
+    <h2>Parking Availability by Hour</h2>
+    <canvas id="predictChart" height="100"></canvas>
+  </div>
+
+  <!-- RECOMMENDATIONS -->
+  <div class="reco-card" id="recoCard" style="display:none">
+    <div class="card-label">SMART TIPS</div>
+    <h2>Recommendations</h2>
+    <div class="reco-list" id="recoList"></div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div><span class="logo-pp">PARK</span><span class="logo-predict">PREDICT</span><p>Smart parking for MMU Cyberjaya</p></div>
+    <div class="footer-links">
+      <a href="index.html">Dashboard</a><a href="map.html">Campus Map</a>
+      <a href="checkin.html">Check In/Out</a><a href="analytics.html">Analytics</a>
+    </div>
+    <div class="footer-copy">© 2025 ParkPredict · MMU Cyberjaya</div>
+  </div>
+</footer>
+
+<script src="../static/js/data.js"></script>
+<script src="../static/js/predict.js"></script>
+</body>
+</html>
