@@ -1,6 +1,3 @@
-// =============================================
-// PARKPREDICT – CHECK IN/OUT (checkin.js)
-// =============================================
 
 let activeSession = null;
 let sessionTimer = null;

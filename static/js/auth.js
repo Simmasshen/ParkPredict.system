@@ -1,6 +1,4 @@
-// =============================================
-// PARKPREDICT – AUTH (auth.js)
-// =============================================
+
 
 // ── Simulated user store (replace with Flask API) ──
 const MOCK_USERS = [

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header>
+    <h1>Dashboard</h1>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h3>Parking Status</h3>
+        <button onclick="getStatus()">Refresh</button>
+        <pre id="status"></pre>
+    </div>
+
+    <div class="card">
+        <h3>Recommendation</h3>
+        <button onclick="getRecommendation()">Get Recommendation</button>
+        <p id="rec"></p>
+    </div>
+
+    <div class="card">
+        <h3>Check In</h3>
+        <input id="zone" placeholder="Zone ID">
+        <button onclick="checkin()">Check In</button>
+    </div>
+
+    <div class="card">
+        <h3>Check Out</h3>
+        <input id="log_id" placeholder="Log ID">
+        <button onclick="checkout()">Check Out</button>
+    </div>
+
+    <div class="card">
+        <h3>User History</h3>
+        <button onclick="getHistory()">Load History</button>
+        <pre id="history"></pre>
+    </div>
+
+    <div class="card">
+        <h3>Analytics</h3>
+        <button onclick="getAnalytics()">Load Analytics</button>
+        <pre id="analytics"></pre>
+    </div>
+
+</div>
+
+<script src="js/dashboard.js"></script>
+
+</body>
+</html>

@@ -1,8 +1,4 @@
-// =============================================
-// PARKPREDICT – SHARED DATA
-// Fetches live data from Flask API via fetch()
-// Falls back to mock data if API is unavailable
-// =============================================
+
 
 // ── Mock / fallback data ──
 const ZONES_MOCK = {

@@ -1,6 +1,4 @@
-// =============================================
-// PARKPREDICT – PREDICT PAGE (predict.js)
-// =============================================
+
 
 let selectedDay = 'Monday';
 let selectedHour = 9;

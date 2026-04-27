@@ -1,6 +1,4 @@
-// =============================================
-// PARKPREDICT – DASHBOARD (main.js)
-// =============================================
+
 
 function renderZones() {
   const grid = document.getElementById('zonesGrid');
