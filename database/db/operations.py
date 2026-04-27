@@ -48,6 +48,15 @@ def check_in(zone_id: int, user_id: str, vehicle_plate: str = None) -> dict:
         if zone["status"] == "maintenance":
             return {"success": False, "error": f"{zone['zone_name']} is under maintenance."}
 
+        # Block double check-in: same user cannot have two active sessions
+        cursor.execute("""
+            SELECT log_id FROM parking_logs
+            WHERE  user_id = ? AND check_out_time IS NULL
+        """, (user_id,))
+        if cursor.fetchone():
+            return {"success": False,
+                    "error": "User already has an active parking session. Please check out first."}
+
         # 2. Insert log
         cursor.execute("""
             INSERT INTO parking_logs
