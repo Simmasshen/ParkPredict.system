@@ -60,13 +60,9 @@
         <label>Parking Zone</label>
         <select id="zoneSelect">
           <option value="">— Select Zone —</option>
-          <option value="A">Zone A – Near FCI (120 slots)</option>
-          <option value="B">Zone B – Top Right (80 slots)</option>
-          <option value="C">Zone C – Left Mid (90 slots)</option>
-          <option value="D">Zone D – Right Mid (60 slots)</option>
-          <option value="E">Zone E – Bottom Left (100 slots)</option>
-          <option value="F">Zone F – Bottom Right (70 slots)</option>
-          <option value="G">Zone G – Multi-Storey (200 slots)</option>
+          <option value="FCI">FCI Parking – Faculty of Computing &amp; Informatics (120 slots)</option>
+          <option value="FOM">FOM Parking – Faculty of Management (80 slots)</option>
+          <option value="DTC">DTC Parking – Grand Hall (100 slots)</option>
         </select>
       </div>
       <div class="form-group">
@@ -89,7 +85,7 @@
     </button>
   </div>
 
-  <!-- CHECK OUT PANEL (hidden until checked in) -->
+  <!-- CHECK OUT PANEL -->
   <div class="checkout-card" id="checkoutCard" style="display:none">
     <div class="card-label card-label--red">CHECK OUT</div>
     <h2>End Parking Session</h2>
@@ -108,25 +104,17 @@
       <table class="activity-table">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Zone</th>
-            <th>Vehicle</th>
-            <th>In</th>
-            <th>Out</th>
-            <th>Duration</th>
-            <th>Status</th>
+            <th>ID</th><th>Zone</th><th>Vehicle</th>
+            <th>In</th><th>Out</th><th>Duration</th><th>Status</th>
           </tr>
         </thead>
-        <tbody id="activityBody">
-          <!-- filled by JS -->
-        </tbody>
+        <tbody id="activityBody"></tbody>
       </table>
     </div>
   </div>
 
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <footer class="footer">

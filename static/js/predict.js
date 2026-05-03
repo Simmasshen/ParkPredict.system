@@ -1,10 +1,7 @@
-
-
 let selectedDay = 'Monday';
 let selectedHour = 9;
 let predictChart = null;
 
-// Day picker
 document.querySelectorAll('.day-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
@@ -23,24 +20,22 @@ function updateTimeDisplay(val) {
 async function runPrediction() {
   const zone = document.getElementById('predictZone').value;
 
-  // Fetch from API (falls back to local model automatically)
-  const result = await fetchPrediction(selectedDay, selectedHour);
+  const result = await fetchPrediction(selectedDay, selectedHour, zone);
   const probability = result.availability_pct;
   const occupancyAtTime = result.occupancy_pct;
   const color = probability > 50 ? '#22c55e' : probability > 20 ? '#f59e0b' : '#ef4444';
   const bgColor = probability > 50 ? 'rgba(34,197,94,0.1)' : probability > 20 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)';
   const label = probability > 50 ? 'GOOD TO GO' : probability > 20 ? 'MODERATE' : 'VERY BUSY';
 
-  // Zone-level predictions
   const zoneProbs = zone === 'all'
     ? Object.entries(ZONES).map(([k, z]) => {
-        const pct = z.available / z.total;
-        const prob = Math.round(pct * 100 * (0.8 + Math.random() * 0.4));
-        return { key: k, name: z.name, prob: Math.min(99, prob) };
+        const idx = Math.max(0, Math.min(13, selectedHour - 7));
+        const zoneOcc = PEAK_MODEL[k]?.[selectedDay]?.[idx] ?? occupancyAtTime;
+        const prob = Math.max(0, 100 - zoneOcc);
+        return { key: k, name: z.name, prob };
       })
     : [{ key: zone, name: ZONES[zone]?.name, prob: probability }];
 
-  // Results panel
   document.getElementById('predictResults').innerHTML = `
     <div style="width:100%">
       <div class="card-label">PREDICTION RESULT</div>
@@ -68,12 +63,8 @@ async function runPrediction() {
     </div>
   `;
 
-  // Show chart
   renderPredictChart();
-
-  // Show recommendations
   renderRecommendations(probability, selectedDay, selectedHour);
-
   document.getElementById('predictChartCard').style.display = 'block';
   document.getElementById('recoCard').style.display = 'block';
 }
@@ -83,12 +74,14 @@ function renderPredictChart() {
   if (!ctx) return;
   if (predictChart) predictChart.destroy();
 
-  const data = PEAK_MODEL[selectedDay] || PEAK_MODEL['Monday'];
-  const probData = data.map(v => Math.max(0, 100 - v));
+  const zoneKey = document.getElementById('predictZone').value;
+  const dayData = zoneKey === 'all'
+    ? getPeakModelAvg(selectedDay)
+    : (PEAK_MODEL[zoneKey]?.[selectedDay] || getPeakModelAvg(selectedDay));
+  const probData = dayData.map(v => Math.max(0, 100 - v));
   const selectedIdx = selectedHour - 7;
-
-  const pointBg = data.map((_, i) => i === selectedIdx ? '#ffffff' : '#3b82f6');
-  const pointR = data.map((_, i) => i === selectedIdx ? 8 : 3);
+  const pointBg = dayData.map((_, i) => i === selectedIdx ? '#ffffff' : '#3b82f6');
+  const pointR  = dayData.map((_, i) => i === selectedIdx ? 8 : 3);
 
   predictChart = new Chart(ctx, {
     type: 'line',
@@ -115,16 +108,11 @@ function renderPredictChart() {
           borderColor: '#1e2740',
           borderWidth: 1,
           callbacks: { label: c => ` ${c.parsed.y}% chance of parking` }
-        },
-        annotation: {}
+        }
       },
       scales: {
         x: { grid: { color: '#1e2740' } },
-        y: {
-          grid: { color: '#1e2740' },
-          ticks: { callback: v => v + '%' },
-          min: 0, max: 100
-        }
+        y: { grid: { color: '#1e2740' }, ticks: { callback: v => v + '%' }, min: 0, max: 100 }
       }
     }
   });
@@ -133,22 +121,21 @@ function renderPredictChart() {
 function renderRecommendations(prob, day, hour) {
   const recoEl = document.getElementById('recoList');
   if (!recoEl) return;
-
   const recos = [];
 
   if (prob < 30) {
-    recos.push({ icon: '⏰', text: `<strong>Arrive earlier.</strong> Try coming before ${hour > 8 ? (hour - 1) + ':00 ' + (hour-1 >= 12 ? 'PM' : 'AM') : '7:30 AM'} to improve your chances significantly.` });
-    recos.push({ icon: '🏍', text: `<strong>Consider Zone G</strong> (Multi-Storey) – it has the most total slots and usually has space even during peak hours.` });
-    recos.push({ icon: '🚌', text: `<strong>Explore alternatives.</strong> MMU shuttle service and carpooling can help avoid parking stress during ${day} peak hours.` });
+    recos.push({ icon: '⏰', text: `<strong>Arrive earlier.</strong> Try coming before ${hour > 8 ? (hour-1)+':00 '+(hour-1>=12?'PM':'AM') : '7:30 AM'} to improve your chances.` });
+    recos.push({ icon: '🏍', text: `<strong>Consider DTC Parking</strong> – it has the most total slots and usually has space even during peak hours.` });
+    recos.push({ icon: '🚌', text: `<strong>Explore alternatives.</strong> MMU shuttle service and carpooling can help during ${day} peak hours.` });
   } else if (prob < 60) {
-    recos.push({ icon: '🟡', text: `<strong>Moderate availability.</strong> Head to Zone A or Zone E first – they tend to have better availability on ${day}s.` });
-    recos.push({ icon: '⏱', text: `<strong>Best window:</strong> Arriving 15–20 minutes before ${hour}:00 gives you a much better chance of securing a spot.` });
+    recos.push({ icon: '🟡', text: `<strong>Moderate availability.</strong> Head to FCI or DTC Parking first – they tend to have better availability on ${day}s.` });
+    recos.push({ icon: '⏱', text: `<strong>Best window:</strong> Arriving 15–20 minutes before ${hour}:00 gives you a much better chance.` });
   } else {
-    recos.push({ icon: '🟢', text: `<strong>Great time to park!</strong> ${day} at ${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'} is typically a low-traffic period on campus.` });
-    recos.push({ icon: '🅿️', text: `<strong>Zone C or Zone E</strong> are closest to the main academic buildings and should have plenty of space.` });
+    recos.push({ icon: '🟢', text: `<strong>Great time to park!</strong> ${day} at ${hour > 12 ? hour-12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'} is typically low-traffic.` });
+    recos.push({ icon: '🅿️', text: `<strong>FCI or DTC Parking</strong> are closest to the main academic buildings and should have plenty of space.` });
   }
 
-  recos.push({ icon: '📊', text: `Based on <strong>historical data</strong>, ${day}s at this time average ${100 - prob}% campus parking occupancy.` });
+  recos.push({ icon: '📊', text: `Based on <strong>historical data</strong>, ${day}s at this time average ${100-prob}% campus parking occupancy.` });
 
   recoEl.innerHTML = recos.map(r => `
     <div class="reco-item">

@@ -34,11 +34,9 @@
 
 <div class="predict-page">
 
-  <!-- INPUT PANEL -->
   <div class="predict-panel">
     <div class="card-label">INPUTS</div>
     <h2>Set Parameters</h2>
-
     <div class="predict-inputs">
       <div class="form-group">
         <label>Day of Week</label>
@@ -62,13 +60,9 @@
         <label>Preferred Zone</label>
         <select id="predictZone">
           <option value="all">All Zones</option>
-          <option value="A">Zone A – Near FCI</option>
-          <option value="B">Zone B – Top Right</option>
-          <option value="C">Zone C – Left Mid</option>
-          <option value="D">Zone D – Right Mid</option>
-          <option value="E">Zone E – Bottom Left</option>
-          <option value="F">Zone F – Bottom Right</option>
-          <option value="G">Zone G – Multi-Storey</option>
+          <option value="FCI">FCI Parking – Faculty of Computing &amp; Informatics</option>
+          <option value="FOM">FOM Parking – Faculty of Management</option>
+          <option value="DTC">DTC Parking – Grand Hall</option>
         </select>
       </div>
       <button class="btn-primary btn-big" onclick="runPrediction()">
@@ -78,7 +72,6 @@
     </div>
   </div>
 
-  <!-- RESULTS PANEL -->
   <div class="predict-results" id="predictResults">
     <div class="predict-empty">
       <div class="predict-empty-icon">🔮</div>
@@ -86,14 +79,12 @@
     </div>
   </div>
 
-  <!-- PROBABILITY CHART -->
   <div class="predict-chart-card" id="predictChartCard" style="display:none">
     <div class="card-label">PROBABILITY CURVE</div>
     <h2>Parking Availability by Hour</h2>
     <canvas id="predictChart" height="100"></canvas>
   </div>
 
-  <!-- RECOMMENDATIONS -->
   <div class="reco-card" id="recoCard" style="display:none">
     <div class="card-label">SMART TIPS</div>
     <h2>Recommendations</h2>
