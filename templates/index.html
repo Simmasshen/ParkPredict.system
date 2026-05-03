@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ParkPredict – MMU Cyberjaya</title>
+  <link rel="stylesheet" href="../static/css/style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <div class="nav-logo">
+    <span class="logo-pp">PARK</span><span class="logo-predict">PREDICT</span>
+    <span class="nav-badge">MMU Cyberjaya</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="index.html" class="active">Dashboard</a></li>
+    <li><a href="map.html">Campus Map</a></li>
+    <li><a href="checkin.html">Check In/Out</a></li>
+    <li><a href="analytics.html">Analytics</a></li>
+    <li><a href="predict.html">Predict</a></li>
+  </ul>
+  <a href="login.html" class="btn-outline" style="font-size:0.82rem;padding:6px 14px;margin-left:auto;flex-shrink:0">Login</a>
+  <div class="nav-time" id="navTime"></div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-content">
+    <div class="hero-tag">LIVE SYSTEM</div>
+    <h1 class="hero-title">Smart Parking<br><span>Intelligence</span></h1>
+    <p class="hero-sub">Real-time availability & AI-powered predictions for MMU Cyberjaya campus parking.</p>
+    <div class="hero-actions">
+      <a href="checkin.html" class="btn-primary">Check In Now</a>
+      <a href="map.html" class="btn-outline">View Map</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-card">
+      <span class="stat-num" id="totalAvail">--</span>
+      <span class="stat-label">Slots Available</span>
+    </div>
+    <div class="stat-card stat-card--alert">
+      <span class="stat-num" id="totalOccupied">--</span>
+      <span class="stat-label">Slots Occupied</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-num" id="occupancyRate">--%</span>
+      <span class="stat-label">Occupancy Rate</span>
+    </div>
+  </div>
+</header>
+
+<!-- LIVE ZONES -->
+<section class="section">
+  <div class="section-header">
+    <h2>Live Zone Status</h2>
+    <span class="live-dot"></span><span class="live-text">Updating live</span>
+  </div>
+  <div class="zones-grid" id="zonesGrid">
+    <!-- injected by JS -->
+  </div>
+</section>
+
+<!-- PEAK HOURS CHART -->
+<section class="section section--dark">
+  <div class="section-header">
+    <h2>Today's Occupancy Trend</h2>
+  </div>
+  <div class="chart-wrap">
+    <canvas id="trendChart"></canvas>
+  </div>
+</section>
+
+<!-- QUICK PREDICT -->
+<section class="section">
+  <div class="section-header">
+    <h2>Quick Prediction</h2>
+    <a href="predict.html" class="link-more">Full Predictor →</a>
+  </div>
+  <div class="predict-quick">
+    <div class="predict-form">
+      <label>Day</label>
+      <select id="qDay">
+        <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+        <option>Thursday</option><option>Friday</option><option>Saturday</option>
+      </select>
+      <label>Time</label>
+      <select id="qTime">
+        <option>7:00 AM</option><option>8:00 AM</option><option>9:00 AM</option>
+        <option>10:00 AM</option><option>11:00 AM</option><option>12:00 PM</option>
+        <option>1:00 PM</option><option>2:00 PM</option><option>3:00 PM</option>
+        <option>4:00 PM</option><option>5:00 PM</option><option>6:00 PM</option>
+      </select>
+      <button class="btn-primary" onclick="quickPredict()">Predict</button>
+    </div>
+    <div class="predict-result" id="qResult">
+      <div class="predict-placeholder">Select day & time to see prediction</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <span class="logo-pp">PARK</span><span class="logo-predict">PREDICT</span>
+      <p>Smart parking for MMU Cyberjaya</p>
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Dashboard</a>
+      <a href="map.html">Campus Map</a>
+      <a href="checkin.html">Check In/Out</a>
+      <a href="analytics.html">Analytics</a>
+    </div>
+    <div class="footer-copy">© 2025 ParkPredict · MMU Cyberjaya</div>
+  </div>
+</footer>
+
+<script src="../static/js/data.js"></script>
+<script src="../static/js/main.js"></script>
+</body>
+</html>

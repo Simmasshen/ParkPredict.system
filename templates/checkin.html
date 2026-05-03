@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Check In/Out – ParkPredict</title>
+  <link rel="stylesheet" href="../static/css/style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-logo">
+    <span class="logo-pp">PARK</span><span class="logo-predict">PREDICT</span>
+    <span class="nav-badge">MMU Cyberjaya</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="index.html">Dashboard</a></li>
+    <li><a href="map.html">Campus Map</a></li>
+    <li><a href="checkin.html" class="active">Check In/Out</a></li>
+    <li><a href="analytics.html">Analytics</a></li>
+    <li><a href="predict.html">Predict</a></li>
+  </ul>
+  <a href="login.html" class="btn-outline" style="font-size:0.82rem;padding:6px 14px;margin-left:auto;flex-shrink:0">Login</a>
+  <div class="nav-time" id="navTime"></div>
+</nav>
+
+<div class="page-header">
+  <h1>Parking <span>Check In / Out</span></h1>
+  <p>Register your parking session to help others find spots faster</p>
+</div>
+
+<div class="checkin-page">
+
+  <!-- STATUS CARD -->
+  <div class="session-status" id="sessionStatus">
+    <div class="session-idle">
+      <div class="session-icon">🅿️</div>
+      <div class="session-text">No active parking session</div>
+      <div class="session-sub">Check in to start tracking</div>
+    </div>
+  </div>
+
+  <!-- CHECK IN FORM -->
+  <div class="checkin-card" id="checkinCard">
+    <div class="card-label">CHECK IN</div>
+    <h2>Start Parking Session</h2>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Student ID</label>
+        <input type="text" id="studentId" placeholder="e.g. 1221103456" maxlength="12"/>
+      </div>
+      <div class="form-group">
+        <label>Vehicle Plate</label>
+        <input type="text" id="vehiclePlate" placeholder="e.g. WXY 1234" style="text-transform:uppercase"/>
+      </div>
+      <div class="form-group">
+        <label>Parking Zone</label>
+        <select id="zoneSelect">
+          <option value="">— Select Zone —</option>
+          <option value="A">Zone A – Near FCI (120 slots)</option>
+          <option value="B">Zone B – Top Right (80 slots)</option>
+          <option value="C">Zone C – Left Mid (90 slots)</option>
+          <option value="D">Zone D – Right Mid (60 slots)</option>
+          <option value="E">Zone E – Bottom Left (100 slots)</option>
+          <option value="F">Zone F – Bottom Right (70 slots)</option>
+          <option value="G">Zone G – Multi-Storey (200 slots)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Vehicle Type</label>
+        <select id="vehicleType">
+          <option value="car">🚗 Car</option>
+          <option value="motorcycle">🏍 Motorcycle</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="checkin-time">
+      <span class="label">Check-in Time:</span>
+      <span class="time-display" id="checkinTimeDisplay">--:-- --</span>
+    </div>
+
+    <button class="btn-primary btn-big" onclick="doCheckIn()">
+      <span>Check In</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+
+  <!-- CHECK OUT PANEL (hidden until checked in) -->
+  <div class="checkout-card" id="checkoutCard" style="display:none">
+    <div class="card-label card-label--red">CHECK OUT</div>
+    <h2>End Parking Session</h2>
+    <div class="session-info" id="sessionInfo"></div>
+    <button class="btn-red btn-big" onclick="doCheckOut()">
+      <span>Check Out</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+
+  <!-- RECENT ACTIVITY -->
+  <div class="activity-card">
+    <div class="card-label">RECENT ACTIVITY</div>
+    <h2>Today's Sessions</h2>
+    <div class="activity-table-wrap">
+      <table class="activity-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Zone</th>
+            <th>Vehicle</th>
+            <th>In</th>
+            <th>Out</th>
+            <th>Duration</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="activityBody">
+          <!-- filled by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div><span class="logo-pp">PARK</span><span class="logo-predict">PREDICT</span><p>Smart parking for MMU Cyberjaya</p></div>
+    <div class="footer-links">
+      <a href="index.html">Dashboard</a><a href="map.html">Campus Map</a>
+      <a href="checkin.html">Check In/Out</a><a href="analytics.html">Analytics</a>
+    </div>
+    <div class="footer-copy">© 2025 ParkPredict · MMU Cyberjaya</div>
+  </div>
+</footer>
+
+<script src="../static/js/data.js"></script>
+<script src="../static/js/checkin.js"></script>
+</body>
+</html>
