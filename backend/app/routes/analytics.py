@@ -4,7 +4,7 @@ ParkPredict — Analytics Routes
 Endpoints that return processed data for charts and predictions.
 Uses Pandas to process raw data from Nitesh's database.
 
-Endpoints:
+Endpoints
   GET /api/analytics/peak-hours          → peak hours chart data
   GET /api/analytics/prediction          → avg occupancy prediction data
   GET /api/analytics/summary             → overall summary stats
