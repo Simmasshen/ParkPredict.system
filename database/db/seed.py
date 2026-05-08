@@ -9,11 +9,9 @@ from db.connection import get_connection
 
 # Default parking zones for MMU Cyberjaya
 ZONES = [
-    ("Zone A", "Near Main Entrance",            80),
-    ("Zone B", "Near Faculty of Engineering",   60),
-    ("Zone C", "Near Student Residential Area", 100),
-    ("Zone D", "Near Library Block",            50),
-    ("Zone E", "Near Sports Complex",           40),
+    ("Zone A", "FCI Parking", 120),
+    ("Zone B", "FOM Parking", 80),
+    ("Zone C", "DTC Parking", 100),
 ]
 
 
