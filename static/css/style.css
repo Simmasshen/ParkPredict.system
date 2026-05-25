@@ -1318,3 +1318,143 @@ input[type="range"]::-webkit-slider-thumb {
   .kpi-row { grid-template-columns: 1fr 1fr; padding: 1rem; }
   .form-grid { grid-template-columns: 1fr; }
 }
+
+/* =============================================
+   MMU THEME ADDITIONS
+   ============================================= */
+
+/* MMU Gold accent variable */
+:root {
+  --mmu-blue:   #00235b;
+  --mmu-gold:   #FFD700;
+  --mmu-blue2:  #003d99;
+}
+
+/* MMU Banner – shared across pages */
+.mmu-banner {
+  background: linear-gradient(90deg, #00235b 0%, #003d99 40%, #0058cc 60%, #003d99 80%, #00235b 100%);
+  border-bottom: 2px solid var(--mmu-gold);
+  padding: 6px 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  overflow: hidden;
+  position: relative;
+}
+.mmu-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg, transparent, transparent 60px,
+    rgba(255,215,0,0.04) 60px, rgba(255,215,0,0.04) 61px
+  );
+  pointer-events: none;
+}
+.mmu-crest {
+  width: 30px; height: 30px;
+  background: var(--mmu-gold);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 0.72rem;
+  color: var(--mmu-blue);
+  font-family: var(--font-disp);
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 8px rgba(255,215,0,0.45);
+  flex-shrink: 0;
+}
+.mmu-name {
+  font-family: var(--font-disp);
+  font-size: 0.9rem;
+  color: #fff;
+  letter-spacing: 0.12em;
+  z-index: 1;
+}
+.mmu-name span { color: var(--mmu-gold); }
+.mmu-banner-divider {
+  width: 1px; height: 18px;
+  background: rgba(255,215,0,0.3);
+  flex-shrink: 0; z-index: 1;
+}
+.mmu-banner-text {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.7);
+  font-family: var(--font-body);
+  letter-spacing: 0.06em;
+  z-index: 1;
+}
+.mmu-banner-right {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--mmu-gold);
+  opacity: 0.8;
+  z-index: 1;
+}
+
+/* MMU gold accent on navbar logo */
+.nav-badge {
+  background: rgba(255,215,0,0.1);
+  border: 1px solid rgba(255,215,0,0.25);
+  color: #c9a800;
+}
+
+/* Stat cards – gold top accent for MMU feel */
+.stat-card:first-child::before {
+  background: linear-gradient(90deg, var(--mmu-blue2), var(--accent));
+}
+
+/* Page header accent line */
+.page-header {
+  position: relative;
+}
+.page-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 2rem;
+  width: 60px; height: 2px;
+  background: linear-gradient(90deg, var(--mmu-gold), transparent);
+}
+
+/* Hero title gold underline */
+.hero-title span {
+  position: relative;
+}
+.hero-title span::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0;
+  width: 100%; height: 2px;
+  background: var(--mmu-gold);
+  opacity: 0.4;
+  border-radius: 1px;
+}
+
+/* Zone card MMU highlight */
+.zone-card {
+  transition: border-color 0.2s, transform 0.15s;
+}
+.zone-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Toast MMU branding */
+.toast {
+  font-family: var(--font-body);
+}
+
+/* Footer MMU crest */
+.footer-inner > div:first-child::before {
+  content: 'MMU';
+  display: inline-block;
+  background: var(--mmu-gold);
+  color: var(--mmu-blue);
+  font-family: var(--font-disp);
+  font-size: 0.55rem;
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.06em;
+  margin-right: 6px;
+  vertical-align: middle;
+  opacity: 0.7;
+}

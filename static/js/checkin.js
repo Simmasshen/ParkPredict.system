@@ -1,6 +1,6 @@
-
 let activeSession = null;
 let sessionTimer = null;
+let autoCheckoutTimer = null;
 
 function updateCheckinTime() {
   const el = document.getElementById('checkinTimeDisplay');
@@ -18,6 +18,43 @@ function showToast(msg, type = '') {
   setTimeout(() => t.className = 'toast', 3000);
 }
 
+// ── Auto checkout at 9 PM ──
+function scheduleAutoCheckout() {
+  if (autoCheckoutTimer) clearTimeout(autoCheckoutTimer);
+  const now = new Date();
+  const cutoff = new Date();
+  cutoff.setHours(21, 0, 0, 0); // 9:00:00 PM
+
+  // If already past 9PM today, schedule for next day (edge case)
+  if (now >= cutoff) {
+    cutoff.setDate(cutoff.getDate() + 1);
+  }
+
+  const msUntilCutoff = cutoff - now;
+  console.log(`[ParkPredict] Auto-checkout scheduled in ${Math.round(msUntilCutoff/60000)} minutes`);
+
+  autoCheckoutTimer = setTimeout(() => {
+    if (activeSession) {
+      showToast('⏰ Auto checkout: Campus closes at 9 PM. Session ended automatically.', 'red');
+      doCheckOut(true);
+    }
+  }, msUntilCutoff);
+}
+
+// ── Warning at 8:45 PM ──
+function scheduleCheckoutWarning() {
+  const now = new Date();
+  const warn = new Date();
+  warn.setHours(20, 45, 0, 0); // 8:45 PM
+  if (now >= warn) return;
+  const msUntilWarn = warn - now;
+  setTimeout(() => {
+    if (activeSession) {
+      showToast('⚠️ Campus closes at 9 PM – please check out soon!', '');
+    }
+  }, msUntilWarn);
+}
+
 async function doCheckIn() {
   const studentId = document.getElementById('studentId').value.trim();
   const plate = document.getElementById('vehiclePlate').value.trim().toUpperCase();
@@ -28,14 +65,17 @@ async function doCheckIn() {
   if (!plate)     { showToast('Please enter your vehicle plate', 'red'); return; }
   if (!zone)      { showToast('Please select a parking zone', 'red'); return; }
 
+  // Block check-in at or after 9 PM
   const now = new Date();
+  if (now.getHours() >= 21) {
+    showToast('❌ Check-in not allowed after 9 PM. Campus parking closes at 9 PM.', 'red');
+    return;
+  }
 
   try {
-    // Try real API first
     const result = await apiCheckIn({ student_id: studentId, plate, zone, vehicle_type: type });
     activeSession = { studentId, plate, zone, type, startTime: now, sessionId: result.session_id };
   } catch (err) {
-    // Fallback: work offline if Flask not running
     console.warn('[ParkPredict] Check-in API failed, running offline:', err.message);
     activeSession = { studentId, plate, zone, type, startTime: now, sessionId: null };
     if (ZONES[zone] && ZONES[zone].available > 0) ZONES[zone].available--;
@@ -47,9 +87,13 @@ async function doCheckIn() {
   updateSessionInfo();
   addActivityRow(studentId, zone, plate, type, now, null);
   showToast('✅ Checked in successfully!', 'green');
+
+  // Schedule auto checkout at 9 PM
+  scheduleAutoCheckout();
+  scheduleCheckoutWarning();
 }
 
-async function doCheckOut() {
+async function doCheckOut(isAuto = false) {
   if (!activeSession) return;
   const now = new Date();
   const diff = Math.floor((now - activeSession.startTime) / 1000);
@@ -61,7 +105,6 @@ async function doCheckOut() {
     if (activeSession.sessionId) {
       await apiCheckOut(activeSession.sessionId);
     } else {
-      // Offline fallback
       if (ZONES[activeSession.zone]) {
         ZONES[activeSession.zone].available = Math.min(
           ZONES[activeSession.zone].total,
@@ -76,6 +119,7 @@ async function doCheckOut() {
   updateLastActivityRow(now, dur);
   activeSession = null;
   clearInterval(sessionTimer);
+  if (autoCheckoutTimer) { clearTimeout(autoCheckoutTimer); autoCheckoutTimer = null; }
 
   document.getElementById('checkinCard').style.display = 'block';
   document.getElementById('checkoutCard').style.display = 'none';
@@ -83,14 +127,15 @@ async function doCheckOut() {
   document.getElementById('vehiclePlate').value = '';
   document.getElementById('zoneSelect').value = '';
 
+  const autoMsg = isAuto ? '⏰ Auto-checked out at 9 PM' : '✅ Session ended – Thanks!';
   document.getElementById('sessionStatus').innerHTML = `
     <div class="session-idle">
-      <div class="session-icon">✅</div>
-      <div class="session-text">Session ended – Thanks!</div>
+      <div class="session-icon">${isAuto ? '⏰' : '✅'}</div>
+      <div class="session-text">${autoMsg}</div>
       <div class="session-sub">Duration: ${dur}</div>
     </div>
   `;
-  showToast('✅ Checked out! Duration: ' + dur, 'green');
+  if (!isAuto) showToast('✅ Checked out! Duration: ' + dur, 'green');
   setTimeout(() => {
     document.getElementById('sessionStatus').innerHTML = `
       <div class="session-idle">
@@ -112,6 +157,11 @@ function updateSessionStatus(startTime) {
     const timeStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 
     if (!activeSession) return;
+
+    // Warn colour if past 8:45 PM
+    const isLate = now.getHours() >= 20 && now.getMinutes() >= 45;
+    const timerColor = isLate ? 'var(--yellow)' : 'var(--accent2)';
+
     document.getElementById('sessionStatus').innerHTML = `
       <div class="session-active">
         <div class="session-active-icon">🟢</div>
@@ -122,8 +172,9 @@ function updateSessionStatus(startTime) {
             <span>${activeSession.plate}</span>
             <span>${ZONES[activeSession.zone]?.location || ''}</span>
           </div>
+          ${isLate ? '<div style="font-size:0.72rem;color:var(--yellow);margin-top:4px">⚠️ Campus closes at 9 PM – please check out soon</div>' : ''}
         </div>
-        <div class="session-timer">${timeStr}</div>
+        <div class="session-timer" style="color:${timerColor}">${timeStr}</div>
       </div>
     `;
   };
@@ -140,6 +191,7 @@ function updateSessionInfo() {
     <div class="session-info-row"><span>Vehicle</span><span class="session-info-val">${activeSession.plate}</span></div>
     <div class="session-info-row"><span>Zone</span><span class="session-info-val">Zone ${activeSession.zone} – ${z?.location}</span></div>
     <div class="session-info-row"><span>Checked in</span><span class="session-info-val">${activeSession.startTime.toLocaleTimeString('en-MY', {hour:'2-digit',minute:'2-digit'})}</span></div>
+    <div class="session-info-row"><span>Auto-checkout</span><span class="session-info-val" style="color:var(--yellow)">9:00 PM</span></div>
   `;
 }
 
@@ -169,7 +221,6 @@ function updateLastActivityRow(outTime, dur) {
   if (statusEl) { statusEl.className = 'status-done'; statusEl.textContent = 'DONE'; }
 }
 
-// Load activity table — tries API first, falls back to mock
 async function renderActivityTable() {
   const tbody = document.getElementById('activityBody');
   if (!tbody) return;
@@ -177,10 +228,8 @@ async function renderActivityTable() {
   let sessions;
   try {
     sessions = await fetchSessions();
-    // Normalize API format to display format
     sessions = sessions.map(s => {
       if (s.check_in) {
-        // API format
         const inTime  = new Date(s.check_in);
         const outTime = s.check_out ? new Date(s.check_out) : null;
         return {
@@ -194,7 +243,7 @@ async function renderActivityTable() {
           status:   s.check_out ? 'done' : 'active'
         };
       }
-      return s; // already mock format
+      return s;
     });
   } catch (e) {
     sessions = SESSIONS_DATA;
