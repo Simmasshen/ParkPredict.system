@@ -68,7 +68,7 @@ async function doCheckIn() {
   // Block check-in at or after 9 PM
   const now = new Date();
   if (now.getHours() >= 21) {
-    showToast('❌ Check-in not allowed after 9 PM. Campus parking closes at 9 PM.', 'red');
+    showToast('❌ Check-in not allowed after 9 PM. No need to check in this time.', 'red');
     return;
   }
 

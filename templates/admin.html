@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ParkPredict – Admin</title>
+  <link rel="stylesheet" href="../static/css/style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* ── Admin-specific styles ── */
+    .admin-hero {
+      background: linear-gradient(135deg, #0a0f1e 0%, #0d1b2a 60%, #1a0a2e 100%);
+      padding: 48px 5vw 36px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .admin-hero-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .admin-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.6rem; color: #fff; letter-spacing: 0.04em; }
+    .admin-title span { color: #4fc3f7; }
+    .admin-badge {
+      background: rgba(255,80,80,0.15);
+      border: 1px solid rgba(255,80,80,0.35);
+      color: #ff6b6b;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      padding: 4px 12px;
+      border-radius: 4px;
+      letter-spacing: 0.1em;
+    }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+    }
+    .stat-box {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 18px 20px;
+      transition: border-color 0.2s;
+    }
+    .stat-box:hover { border-color: rgba(79,195,247,0.3); }
+    .stat-box .val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      color: #fff;
+      line-height: 1;
+    }
+    .stat-box .val.danger  { color: #ff6b6b; }
+    .stat-box .val.warning { color: #ffd166; }
+    .stat-box .val.success { color: #06d6a0; }
+    .stat-box .lbl { font-size: 0.75rem; color: #8892b0; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+    /* ── Sections ── */
+    .admin-section { padding: 36px 5vw; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .admin-section:last-child { border-bottom: none; }
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      color: #fff;
+      letter-spacing: 0.06em;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* ── Zone cards ── */
+    .zones-admin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .zone-admin-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.2s;
+    }
+    .zone-admin-card:hover { background: rgba(255,255,255,0.06); border-color: rgba(79,195,247,0.2); }
+    .zone-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .zone-card-name { font-size: 1rem; font-weight: 600; color: #fff; }
+    .zone-card-loc  { font-size: 0.75rem; color: #8892b0; margin-top: 2px; }
+    .status-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      padding: 3px 10px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      flex-shrink: 0;
+    }
+    .status-available   { background: rgba(6,214,160,0.15);  color: #06d6a0; border: 1px solid rgba(6,214,160,0.3); }
+    .status-full        { background: rgba(255,107,107,0.15); color: #ff6b6b; border: 1px solid rgba(255,107,107,0.3); }
+    .status-maintenance { background: rgba(255,209,102,0.15); color: #ffd166; border: 1px solid rgba(255,209,102,0.3); }
+
+    .zone-slots-bar { height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; margin: 10px 0; overflow: hidden; }
+    .zone-slots-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+    .fill-green  { background: #06d6a0; }
+    .fill-yellow { background: #ffd166; }
+    .fill-red    { background: #ff6b6b; }
+
+    .zone-slots-text { font-size: 0.78rem; color: #8892b0; margin-bottom: 14px; }
+    .zone-slots-text span { color: #fff; font-weight: 500; }
+
+    .zone-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-sm {
+      font-size: 0.72rem;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      transition: all 0.15s;
+      background: transparent;
+    }
+    .btn-reset     { border-color: rgba(255,107,107,0.4); color: #ff6b6b; }
+    .btn-reset:hover { background: rgba(255,107,107,0.15); }
+    .btn-maint     { border-color: rgba(255,209,102,0.4); color: #ffd166; }
+    .btn-maint:hover { background: rgba(255,209,102,0.15); }
+    .btn-open      { border-color: rgba(6,214,160,0.4);   color: #06d6a0; }
+    .btn-open:hover { background: rgba(6,214,160,0.15); }
+
+    /* ── Active logs table ── */
+    .admin-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .admin-table th {
+      background: rgba(255,255,255,0.04);
+      color: #8892b0;
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .admin-table td {
+      padding: 12px 16px;
+      color: #ccd6f6;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+    }
+    .admin-table tr:last-child td { border-bottom: none; }
+    .admin-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .empty-state { text-align: center; padding: 40px; color: #8892b0; font-size: 0.85rem; }
+
+    /* ── Toast notification ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0d1b2a;
+      border: 1px solid rgba(6,214,160,0.4);
+      color: #06d6a0;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-family: 'JetBrains Mono', monospace;
+      z-index: 999;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.error { border-color: rgba(255,107,107,0.4); color: #ff6b6b; }
+
+    /* ── Refresh button ── */
+    .btn-refresh {
+      background: rgba(79,195,247,0.1);
+      border: 1px solid rgba(79,195,247,0.3);
+      color: #4fc3f7;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-refresh:hover { background: rgba(79,195,247,0.2); }
+
+    .last-refresh { font-size: 0.72rem; color: #8892b0; font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <div class="nav-logo">
+    <span class="logo-pp">PARK</span><span class="logo-predict">PREDICT</span>
+    <span class="nav-badge">MMU Cyberjaya</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="index.html">Dashboard</a></li>
+    <li><a href="map.html">Campus Map</a></li>
+    <li><a href="checkin.html">Check In/Out</a></li>
+    <li><a href="analytics.html">Analytics</a></li>
+    <li><a href="predict.html">Predict</a></li>
+    <li><a href="admin.html" class="active">Admin</a></li>
+  </ul>
+  <div class="nav-time" id="navTime"></div>
+</nav>
+
+<!-- ADMIN HERO -->
+<div class="admin-hero">
+  <div class="admin-hero-top">
+    <div>
+      <div class="admin-title">Admin <span>Dashboard</span></div>
+      <div style="font-size:0.8rem; color:#8892b0; margin-top:4px;">Manage parking zones and monitor live sessions</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+      <span class="last-refresh">Last updated: <span id="lastRefresh">--</span></span>
+      <button class="btn-refresh" onclick="loadAll()">↻ Refresh</button>
+      <span class="admin-badge">ADMIN PANEL</span>
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="val" id="statTotal">--</div>
+      <div class="lbl">Total Slots</div>
+    </div>
+    <div class="stat-box">
+      <div class="val success" id="statAvailable">--</div>
+      <div class="lbl">Available</div>
+    </div>
+    <div class="stat-box">
+      <div class="val danger" id="statOccupied">--</div>
+      <div class="lbl">Occupied</div>
+    </div>
+    <div class="stat-box">
+      <div class="val warning" id="statRate">--%</div>
+      <div class="lbl">Occupancy Rate</div>
+    </div>
+    <div class="stat-box">
+      <div class="val" id="statActive">--</div>
+      <div class="lbl">Active Sessions</div>
+    </div>
+    <div class="stat-box">
+      <div class="val warning" id="statFull">--</div>
+      <div class="lbl">Full Zones</div>
+    </div>
+  </div>
+</div>
+
+<!-- ZONE MANAGEMENT -->
+<div class="admin-section">
+  <div class="section-title">Zone Management</div>
+  <div class="zones-admin-grid" id="zonesAdminGrid">
+    <div class="empty-state">Loading zones...</div>
+  </div>
+</div>
+
+<!-- ACTIVE SESSIONS -->
+<div class="admin-section">
+  <div class="section-title">Active Sessions</div>
+  <div class="admin-table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Log ID</th>
+          <th>Zone</th>
+          <th>User ID</th>
+          <th>Vehicle</th>
+          <th>Check-in Time</th>
+          <th>Day</th>
+          <th>Hour</th>
+        </tr>
+      </thead>
+      <tbody id="logsTableBody">
+        <tr><td colspan="7" class="empty-state">Loading sessions...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ── API Config — change IP to Pirai's IP ── -->
+<script>
+  const BASE_URL = "http://127.0.0.1:5000";
+</script>
+
+<script src="../static/js/data.js"></script>
+<script>
+// ── Load stats ──
+async function loadStats() {
+  try {
+    const res  = await fetch(`${BASE_URL}/api/admin/stats`);
+    const data = await res.json();
+    if (!data.success) return;
+    const s = data.data;
+    document.getElementById('statTotal').textContent     = s.total_slots;
+    document.getElementById('statAvailable').textContent = s.available_slots;
+    document.getElementById('statOccupied').textContent  = s.occupied_slots;
+    document.getElementById('statRate').textContent      = s.occupancy_rate_percent + '%';
+    document.getElementById('statFull').textContent      = s.full_zones;
+    document.getElementById('lastRefresh').textContent   = s.last_updated;
+  } catch(e) {
+    console.warn('Stats unavailable');
+  }
+}
+
+// ── Load zones ──
+async function loadZonesAdmin() {
+  try {
+    const res  = await fetch(`${BASE_URL}/api/admin/zones`);
+    const data = await res.json();
+    if (!data.success) return;
+
+    const grid = document.getElementById('zonesAdminGrid');
+    grid.innerHTML = '';
+
+    data.data.forEach(zone => {
+      const pct       = zone.available_slots / zone.total_slots;
+      const fillClass = pct > 0.5 ? 'fill-green' : pct > 0.2 ? 'fill-yellow' : 'fill-red';
+      const fillW     = Math.round((1 - pct) * 100);
+      const statusCls = `status-${zone.status}`;
+
+      grid.innerHTML += `
+        <div class="zone-admin-card">
+          <div class="zone-card-top">
+            <div>
+              <div class="zone-card-name">${zone.zone_name}</div>
+              <div class="zone-card-loc">${zone.location}</div>
+            </div>
+            <span class="status-badge ${statusCls}">${zone.status}</span>
+          </div>
+          <div class="zone-slots-bar">
+            <div class="zone-slots-fill ${fillClass}" style="width:${fillW}%"></div>
+          </div>
+          <div class="zone-slots-text">
+            <span>${zone.available_slots}</span> available of <span>${zone.total_slots}</span> total slots
+          </div>
+          <div class="zone-actions">
+            <button class="btn-sm btn-open"  onclick="setStatus(${zone.zone_id}, 'available')">✓ Open</button>
+            <button class="btn-sm btn-maint" onclick="setStatus(${zone.zone_id}, 'maintenance')">⚠ Maintenance</button>
+            <button class="btn-sm btn-reset" onclick="resetZone(${zone.zone_id})">↺ Reset Slots</button>
+          </div>
+        </div>`;
+    });
+  } catch(e) {
+    document.getElementById('zonesAdminGrid').innerHTML =
+      '<div class="empty-state">Could not load zones.</div>';
+  }
+}
+
+// ── Load active logs ──
+async function loadLogs() {
+  try {
+    const res  = await fetch(`${BASE_URL}/api/admin/logs`);
+    const data = await res.json();
+    const tbody = document.getElementById('logsTableBody');
+
+    document.getElementById('statActive').textContent = data.count || 0;
+
+    if (!data.data || data.data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No active sessions right now.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.data.map(log => `
+      <tr>
+        <td>#${log.log_id}</td>
+        <td>Zone ${log.zone_id}</td>
+        <td>${log.user_id}</td>
+        <td>${log.vehicle_plate || '—'}</td>
+        <td>${log.check_in_time}</td>
+        <td>${log.day_of_week}</td>
+        <td>${log.hour_of_day}:00</td>
+      </tr>`).join('');
+  } catch(e) {
+    document.getElementById('logsTableBody').innerHTML =
+      '<tr><td colspan="7" class="empty-state">Could not load sessions.</td></tr>';
+  }
+}
+
+// ── Reset zone slots ──
+async function resetZone(zoneId) {
+  if (!confirm(`Reset all slots for Zone ${zoneId}? This will close all active sessions.`)) return;
+  try {
+    const res  = await fetch(`${BASE_URL}/api/admin/reset/${zoneId}`, { method: 'POST' });
+    const data = await res.json();
+    showToast(data.success ? `Zone ${zoneId} reset successfully.` : data.error, !data.success);
+    if (data.success) loadAll();
+  } catch(e) {
+    showToast('Reset failed — is the server running?', true);
+  }
+}
+
+// ── Update zone status ──
+async function setStatus(zoneId, status) {
+  try {
+    const res  = await fetch(`${BASE_URL}/api/admin/status`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ zone_id: zoneId, status })
+    });
+    const data = await res.json();
+    showToast(data.success ? `Zone ${zoneId} set to "${status}".` : data.error, !data.success);
+    if (data.success) loadAll();
+  } catch(e) {
+    showToast('Update failed — is the server running?', true);
+  }
+}
+
+// ── Toast notification ──
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+// ── Load everything ──
+function loadAll() {
+  loadStats();
+  loadZonesAdmin();
+  loadLogs();
+}
+
+// Load on page open + refresh every 30 seconds
+loadAll();
+setInterval(loadAll, 30000);
+</script>
+
+</body>
+</html>
