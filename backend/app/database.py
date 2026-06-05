@@ -72,6 +72,7 @@ try:
         get_zone_by_id,
         get_active_logs,
         get_logs_by_user,
+        get_daily_stats,
         get_peak_hours,
         get_prediction_data,
     )
