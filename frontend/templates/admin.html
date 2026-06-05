@@ -8,6 +8,110 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    /* ── Admin Gate (password screen) ── */
+    .admin-gate {
+      position: fixed;
+      inset: 0;
+      background: #080c18;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .admin-gate-card {
+      background: #0d1220;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
+    .gate-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .gate-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem;
+      letter-spacing: 0.06em;
+      color: #fff;
+      margin-bottom: 0.3rem;
+    }
+    .gate-sub { font-size: 0.8rem; color: #8892b0; margin-bottom: 1.75rem; }
+    .gate-input-wrap {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+    .gate-input {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #fff;
+      border-radius: 10px;
+      padding: 12px 44px 12px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      outline: none;
+      letter-spacing: 0.15em;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-sizing: border-box;
+    }
+    .gate-input:focus {
+      border-color: #4fc3f7;
+      box-shadow: 0 0 0 3px rgba(79,195,247,0.1);
+    }
+    .gate-input.error {
+      border-color: #ff6b6b;
+      box-shadow: 0 0 0 3px rgba(255,107,107,0.1);
+      animation: shake 0.3s ease;
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25%      { transform: translateX(-6px); }
+      75%      { transform: translateX(6px); }
+    }
+    .gate-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #8892b0;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+    }
+    .gate-toggle:hover { color: #ccd6f6; }
+    .gate-error {
+      font-size: 0.75rem;
+      color: #ff6b6b;
+      margin-bottom: 0.75rem;
+      min-height: 18px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .gate-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #1565c0, #4fc3f7);
+      border: none;
+      color: #fff;
+      border-radius: 10px;
+      padding: 13px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .gate-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+    .gate-attempts {
+      margin-top: 1rem;
+      font-size: 0.7rem;
+      color: #8892b0;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .gate-attempts span { color: #ff6b6b; }
+
     /* ── Admin-specific styles ── */
     .admin-hero {
       background: linear-gradient(135deg, #0a0f1e 0%, #0d1b2a 60%, #1a0a2e 100%);
@@ -47,18 +151,12 @@
       transition: border-color 0.2s;
     }
     .stat-box:hover { border-color: rgba(79,195,247,0.3); }
-    .stat-box .val {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 2rem;
-      color: #fff;
-      line-height: 1;
-    }
+    .stat-box .val { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: #fff; line-height: 1; }
     .stat-box .val.danger  { color: #ff6b6b; }
     .stat-box .val.warning { color: #ffd166; }
     .stat-box .val.success { color: #06d6a0; }
     .stat-box .lbl { font-size: 0.75rem; color: #8892b0; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.08em; }
 
-    /* ── Sections ── */
     .admin-section { padding: 36px 5vw; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .admin-section:last-child { border-bottom: none; }
     .section-title {
@@ -71,14 +169,29 @@
       align-items: center;
       gap: 10px;
     }
-    .section-title::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: rgba(255,255,255,0.08);
+    .section-title::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
+
+    /* Live indicator */
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: #06d6a0;
+      letter-spacing: 0.1em;
+    }
+    .live-dot-pulse {
+      width: 7px; height: 7px;
+      background: #06d6a0;
+      border-radius: 50%;
+      animation: livePulse 1.5s infinite;
+    }
+    @keyframes livePulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.4; transform: scale(0.7); }
     }
 
-    /* ── Zone cards ── */
     .zones-admin-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -113,96 +226,108 @@
     .fill-green  { background: #06d6a0; }
     .fill-yellow { background: #ffd166; }
     .fill-red    { background: #ff6b6b; }
-
     .zone-slots-text { font-size: 0.78rem; color: #8892b0; margin-bottom: 14px; }
     .zone-slots-text span { color: #fff; font-weight: 500; }
-
     .zone-actions { display: flex; gap: 8px; flex-wrap: wrap; }
     .btn-sm {
-      font-size: 0.72rem;
-      padding: 6px 12px;
-      border-radius: 6px;
-      border: 1px solid;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 500;
-      transition: all 0.15s;
-      background: transparent;
+      font-size: 0.72rem; padding: 6px 12px; border-radius: 6px; border: 1px solid;
+      cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500;
+      transition: all 0.15s; background: transparent;
     }
     .btn-reset     { border-color: rgba(255,107,107,0.4); color: #ff6b6b; }
     .btn-reset:hover { background: rgba(255,107,107,0.15); }
     .btn-maint     { border-color: rgba(255,209,102,0.4); color: #ffd166; }
     .btn-maint:hover { background: rgba(255,209,102,0.15); }
-    .btn-open      { border-color: rgba(6,214,160,0.4);   color: #06d6a0; }
+    .btn-open      { border-color: rgba(6,214,160,0.4); color: #06d6a0; }
     .btn-open:hover { background: rgba(6,214,160,0.15); }
 
-    /* ── Active logs table ── */
     .admin-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); }
     .admin-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
     .admin-table th {
       background: rgba(255,255,255,0.04);
-      color: #8892b0;
-      font-weight: 500;
-      text-transform: uppercase;
-      font-size: 0.68rem;
-      letter-spacing: 0.1em;
-      padding: 12px 16px;
-      text-align: left;
+      color: #8892b0; font-weight: 500; text-transform: uppercase;
+      font-size: 0.68rem; letter-spacing: 0.1em;
+      padding: 12px 16px; text-align: left;
       border-bottom: 1px solid rgba(255,255,255,0.08);
     }
     .admin-table td {
-      padding: 12px 16px;
-      color: #ccd6f6;
+      padding: 12px 16px; color: #ccd6f6;
       border-bottom: 1px solid rgba(255,255,255,0.04);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
     }
     .admin-table tr:last-child td { border-bottom: none; }
     .admin-table tr:hover td { background: rgba(255,255,255,0.02); }
+    /* Highlight new rows */
+    .admin-table tr.new-row td { background: rgba(6,214,160,0.06); }
     .empty-state { text-align: center; padding: 40px; color: #8892b0; font-size: 0.85rem; }
 
-    /* ── Toast notification ── */
     .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: #0d1b2a;
-      border: 1px solid rgba(6,214,160,0.4);
-      color: #06d6a0;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 0.82rem;
-      font-family: 'JetBrains Mono', monospace;
-      z-index: 999;
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.3s;
-      pointer-events: none;
+      position: fixed; bottom: 24px; right: 24px;
+      background: #0d1b2a; border: 1px solid rgba(6,214,160,0.4);
+      color: #06d6a0; padding: 12px 20px; border-radius: 8px;
+      font-size: 0.82rem; font-family: 'JetBrains Mono', monospace;
+      z-index: 999; opacity: 0; transform: translateY(10px);
+      transition: all 0.3s; pointer-events: none;
     }
     .toast.show { opacity: 1; transform: translateY(0); }
     .toast.error { border-color: rgba(255,107,107,0.4); color: #ff6b6b; }
 
-    /* ── Refresh button ── */
     .btn-refresh {
-      background: rgba(79,195,247,0.1);
-      border: 1px solid rgba(79,195,247,0.3);
-      color: #4fc3f7;
-      padding: 8px 18px;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 500;
-      transition: all 0.2s;
+      background: rgba(79,195,247,0.1); border: 1px solid rgba(79,195,247,0.3);
+      color: #4fc3f7; padding: 8px 18px; border-radius: 8px; font-size: 0.8rem;
+      cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500; transition: all 0.2s;
     }
     .btn-refresh:hover { background: rgba(79,195,247,0.2); }
-
     .last-refresh { font-size: 0.72rem; color: #8892b0; font-family: 'JetBrains Mono', monospace; }
+
+    .btn-logout {
+      background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3);
+      color: #ff6b6b; padding: 8px 16px; border-radius: 8px; font-size: 0.78rem;
+      cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500; transition: all 0.2s;
+    }
+    .btn-logout:hover { background: rgba(255,107,107,0.2); }
+
+    /* Countdown to next refresh */
+    .refresh-countdown {
+      font-size: 0.65rem; color: #5a6080;
+      font-family: 'JetBrains Mono', monospace;
+    }
   </style>
 </head>
 <body>
 
-<!-- NAV -->
+<!-- ══════════════════════════════════════
+     ADMIN GATE — Password Protection
+     ══════════════════════════════════════ -->
+<div class="admin-gate" id="adminGate">
+  <div class="admin-gate-card">
+    <div class="gate-icon">🔐</div>
+    <div class="gate-title">Admin Access</div>
+    <div class="gate-sub">ParkPredict · MMU Cyberjaya · Restricted Area</div>
+    <div class="gate-input-wrap">
+      <input
+        class="gate-input"
+        type="password"
+        id="gatePassword"
+        placeholder="Enter admin password"
+        onkeydown="if(event.key==='Enter') verifyAdmin()"
+        autocomplete="off"
+      />
+      <button class="gate-toggle" onclick="toggleGatePw()" tabindex="-1">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <div class="gate-error" id="gateError"></div>
+    <button class="gate-btn" onclick="verifyAdmin()">Enter Admin Panel</button>
+    <div class="gate-attempts">Attempts remaining: <span id="attemptsLeft">5</span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MAIN ADMIN CONTENT (hidden until auth)
+     ══════════════════════════════════════ -->
+<div id="adminContent" style="display:none">
+
 <nav class="navbar">
   <div class="nav-logo">
     <span class="logo-pp">PARK</span><span class="logo-predict">PREDICT</span>
@@ -227,38 +352,21 @@
       <div style="font-size:0.8rem; color:#8892b0; margin-top:4px;">Manage parking zones and monitor live sessions</div>
     </div>
     <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-      <span class="last-refresh">Last updated: <span id="lastRefresh">--</span></span>
+      <span class="live-indicator"><span class="live-dot-pulse"></span>LIVE</span>
+      <span class="last-refresh">Updated: <span id="lastRefresh">--</span></span>
+      <span class="refresh-countdown">Next refresh in <span id="countdown">30</span>s</span>
       <button class="btn-refresh" onclick="loadAll()">↻ Refresh</button>
       <span class="admin-badge">ADMIN PANEL</span>
+      <button class="btn-logout" onclick="adminLogout()">⬡ Lock</button>
     </div>
   </div>
-
-  <!-- Stats row -->
   <div class="stats-row">
-    <div class="stat-box">
-      <div class="val" id="statTotal">--</div>
-      <div class="lbl">Total Slots</div>
-    </div>
-    <div class="stat-box">
-      <div class="val success" id="statAvailable">--</div>
-      <div class="lbl">Available</div>
-    </div>
-    <div class="stat-box">
-      <div class="val danger" id="statOccupied">--</div>
-      <div class="lbl">Occupied</div>
-    </div>
-    <div class="stat-box">
-      <div class="val warning" id="statRate">--%</div>
-      <div class="lbl">Occupancy Rate</div>
-    </div>
-    <div class="stat-box">
-      <div class="val" id="statActive">--</div>
-      <div class="lbl">Active Sessions</div>
-    </div>
-    <div class="stat-box">
-      <div class="val warning" id="statFull">--</div>
-      <div class="lbl">Full Zones</div>
-    </div>
+    <div class="stat-box"><div class="val" id="statTotal">--</div><div class="lbl">Total Slots</div></div>
+    <div class="stat-box"><div class="val success" id="statAvailable">--</div><div class="lbl">Available</div></div>
+    <div class="stat-box"><div class="val danger" id="statOccupied">--</div><div class="lbl">Occupied</div></div>
+    <div class="stat-box"><div class="val warning" id="statRate">--%</div><div class="lbl">Occupancy Rate</div></div>
+    <div class="stat-box"><div class="val" id="statActive">--</div><div class="lbl">Active Sessions</div></div>
+    <div class="stat-box"><div class="val warning" id="statFull">--</div><div class="lbl">Full Zones</div></div>
   </div>
 </div>
 
@@ -270,9 +378,12 @@
   </div>
 </div>
 
-<!-- ACTIVE SESSIONS -->
+<!-- ACTIVE SESSIONS — LIVE -->
 <div class="admin-section">
-  <div class="section-title">Active Sessions</div>
+  <div class="section-title">
+    Active Sessions
+    <span class="live-indicator" style="font-size:0.7rem"><span class="live-dot-pulse"></span>AUTO-UPDATING</span>
+  </div>
   <div class="admin-table-wrap">
     <table class="admin-table">
       <thead>
@@ -284,165 +395,263 @@
           <th>Check-in Time</th>
           <th>Day</th>
           <th>Hour</th>
+          <th>Duration</th>
         </tr>
       </thead>
       <tbody id="logsTableBody">
-        <tr><td colspan="7" class="empty-state">Loading sessions...</td></tr>
+        <tr><td colspan="8" class="empty-state">Loading sessions...</td></tr>
       </tbody>
     </table>
   </div>
 </div>
 
-<!-- Toast -->
+</div><!-- end #adminContent -->
+
 <div class="toast" id="toast"></div>
 
-<!-- ── API Config — change IP to Pirai's IP ── -->
 <script>
   const BASE_URL = "http://127.0.0.1:5000";
-</script>
 
-<script src="../static/js/data.js"></script>
-<script>
-// ── Load stats ──
-async function loadStats() {
-  try {
-    const res  = await fetch(`${BASE_URL}/api/admin/stats`);
-    const data = await res.json();
-    if (!data.success) return;
-    const s = data.data;
-    document.getElementById('statTotal').textContent     = s.total_slots;
-    document.getElementById('statAvailable').textContent = s.available_slots;
-    document.getElementById('statOccupied').textContent  = s.occupied_slots;
-    document.getElementById('statRate').textContent      = s.occupancy_rate_percent + '%';
-    document.getElementById('statFull').textContent      = s.full_zones;
-    document.getElementById('lastRefresh').textContent   = s.last_updated;
-  } catch(e) {
-    console.warn('Stats unavailable');
-  }
-}
+  // ── ADMIN PASSWORD ──
+  // Change this to whatever password you want
+  const ADMIN_PASSWORD = "parkpredict@admin";
+  let failedAttempts = 0;
+  const MAX_ATTEMPTS = 5;
 
-// ── Load zones ──
-async function loadZonesAdmin() {
-  try {
-    const res  = await fetch(`${BASE_URL}/api/admin/zones`);
-    const data = await res.json();
-    if (!data.success) return;
+  // Check if already authenticated this session
+  window.addEventListener('DOMContentLoaded', () => {
+    if (sessionStorage.getItem('pp_admin') === 'true') {
+      unlockAdmin();
+    }
+    document.getElementById('gatePassword')?.focus();
+  });
 
-    const grid = document.getElementById('zonesAdminGrid');
-    grid.innerHTML = '';
+  function verifyAdmin() {
+    const input = document.getElementById('gatePassword');
+    const errorEl = document.getElementById('gateError');
+    const attemptsEl = document.getElementById('attemptsLeft');
 
-    data.data.forEach(zone => {
-      const pct       = zone.available_slots / zone.total_slots;
-      const fillClass = pct > 0.5 ? 'fill-green' : pct > 0.2 ? 'fill-yellow' : 'fill-red';
-      const fillW     = Math.round((1 - pct) * 100);
-      const statusCls = `status-${zone.status}`;
-
-      grid.innerHTML += `
-        <div class="zone-admin-card">
-          <div class="zone-card-top">
-            <div>
-              <div class="zone-card-name">${zone.zone_name}</div>
-              <div class="zone-card-loc">${zone.location}</div>
-            </div>
-            <span class="status-badge ${statusCls}">${zone.status}</span>
-          </div>
-          <div class="zone-slots-bar">
-            <div class="zone-slots-fill ${fillClass}" style="width:${fillW}%"></div>
-          </div>
-          <div class="zone-slots-text">
-            <span>${zone.available_slots}</span> available of <span>${zone.total_slots}</span> total slots
-          </div>
-          <div class="zone-actions">
-            <button class="btn-sm btn-open"  onclick="setStatus(${zone.zone_id}, 'available')">✓ Open</button>
-            <button class="btn-sm btn-maint" onclick="setStatus(${zone.zone_id}, 'maintenance')">⚠ Maintenance</button>
-            <button class="btn-sm btn-reset" onclick="resetZone(${zone.zone_id})">↺ Reset Slots</button>
-          </div>
-        </div>`;
-    });
-  } catch(e) {
-    document.getElementById('zonesAdminGrid').innerHTML =
-      '<div class="empty-state">Could not load zones.</div>';
-  }
-}
-
-// ── Load active logs ──
-async function loadLogs() {
-  try {
-    const res  = await fetch(`${BASE_URL}/api/admin/logs`);
-    const data = await res.json();
-    const tbody = document.getElementById('logsTableBody');
-
-    document.getElementById('statActive').textContent = data.count || 0;
-
-    if (!data.data || data.data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No active sessions right now.</td></tr>';
+    if (input.value === ADMIN_PASSWORD) {
+      sessionStorage.setItem('pp_admin', 'true');
+      unlockAdmin();
       return;
     }
 
-    tbody.innerHTML = data.data.map(log => `
-      <tr>
-        <td>#${log.log_id}</td>
-        <td>Zone ${log.zone_id}</td>
-        <td>${log.user_id}</td>
-        <td>${log.vehicle_plate || '—'}</td>
-        <td>${log.check_in_time}</td>
-        <td>${log.day_of_week}</td>
-        <td>${log.hour_of_day}:00</td>
-      </tr>`).join('');
-  } catch(e) {
-    document.getElementById('logsTableBody').innerHTML =
-      '<tr><td colspan="7" class="empty-state">Could not load sessions.</td></tr>';
+    failedAttempts++;
+    const remaining = MAX_ATTEMPTS - failedAttempts;
+    attemptsEl.textContent = remaining;
+
+    input.value = '';
+    input.classList.add('error');
+    setTimeout(() => input.classList.remove('error'), 400);
+
+    if (remaining <= 0) {
+      errorEl.textContent = '🔒 Too many attempts. Redirecting...';
+      setTimeout(() => window.location.href = 'index.html', 2000);
+      return;
+    }
+
+    errorEl.textContent = `❌ Incorrect password. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.`;
+    input.focus();
   }
-}
 
-// ── Reset zone slots ──
-async function resetZone(zoneId) {
-  if (!confirm(`Reset all slots for Zone ${zoneId}? This will close all active sessions.`)) return;
-  try {
-    const res  = await fetch(`${BASE_URL}/api/admin/reset/${zoneId}`, { method: 'POST' });
-    const data = await res.json();
-    showToast(data.success ? `Zone ${zoneId} reset successfully.` : data.error, !data.success);
-    if (data.success) loadAll();
-  } catch(e) {
-    showToast('Reset failed — is the server running?', true);
+  function unlockAdmin() {
+    document.getElementById('adminGate').style.display = 'none';
+    document.getElementById('adminContent').style.display = 'block';
+    loadAll();
+    startCountdown();
   }
-}
 
-// ── Update zone status ──
-async function setStatus(zoneId, status) {
-  try {
-    const res  = await fetch(`${BASE_URL}/api/admin/status`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ zone_id: zoneId, status })
-    });
-    const data = await res.json();
-    showToast(data.success ? `Zone ${zoneId} set to "${status}".` : data.error, !data.success);
-    if (data.success) loadAll();
-  } catch(e) {
-    showToast('Update failed — is the server running?', true);
+  function adminLogout() {
+    sessionStorage.removeItem('pp_admin');
+    location.reload();
   }
-}
 
-// ── Toast notification ──
-function showToast(msg, isError = false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className   = 'toast show' + (isError ? ' error' : '');
-  setTimeout(() => t.className = 'toast', 3000);
-}
+  function toggleGatePw() {
+    const input = document.getElementById('gatePassword');
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
 
-// ── Load everything ──
-function loadAll() {
-  loadStats();
-  loadZonesAdmin();
-  loadLogs();
-}
+  // ── COUNTDOWN TIMER ──
+  let countdownVal = 30;
+  function startCountdown() {
+    setInterval(() => {
+      countdownVal--;
+      if (countdownVal <= 0) countdownVal = 30;
+      const el = document.getElementById('countdown');
+      if (el) el.textContent = countdownVal;
+    }, 1000);
+  }
 
-// Load on page open + refresh every 30 seconds
-loadAll();
-setInterval(loadAll, 30000);
+  // ── LOAD STATS ──
+  async function loadStats() {
+    try {
+      const res  = await fetch(`${BASE_URL}/api/admin/stats`);
+      const data = await res.json();
+      if (!data.success) return;
+      const s = data.data;
+      document.getElementById('statTotal').textContent     = s.total_slots;
+      document.getElementById('statAvailable').textContent = s.available_slots;
+      document.getElementById('statOccupied').textContent  = s.occupied_slots;
+      document.getElementById('statRate').textContent      = s.occupancy_rate_percent + '%';
+      document.getElementById('statFull').textContent      = s.full_zones;
+      document.getElementById('lastRefresh').textContent   = new Date().toLocaleTimeString('en-MY', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    } catch(e) {
+      console.warn('Stats unavailable — is the Flask server running?');
+    }
+  }
+
+  // ── LOAD ZONES ──
+  async function loadZonesAdmin() {
+    try {
+      const res  = await fetch(`${BASE_URL}/api/admin/zones`);
+      const data = await res.json();
+      if (!data.success) return;
+      const grid = document.getElementById('zonesAdminGrid');
+      grid.innerHTML = '';
+      data.data.forEach(zone => {
+        const pct       = zone.available_slots / zone.total_slots;
+        const fillClass = pct > 0.5 ? 'fill-green' : pct > 0.2 ? 'fill-yellow' : 'fill-red';
+        const fillW     = Math.round((1 - pct) * 100);
+        const statusCls = `status-${zone.status}`;
+        grid.innerHTML += `
+          <div class="zone-admin-card">
+            <div class="zone-card-top">
+              <div>
+                <div class="zone-card-name">${zone.zone_name}</div>
+                <div class="zone-card-loc">${zone.location}</div>
+              </div>
+              <span class="status-badge ${statusCls}">${zone.status}</span>
+            </div>
+            <div class="zone-slots-bar">
+              <div class="zone-slots-fill ${fillClass}" style="width:${fillW}%"></div>
+            </div>
+            <div class="zone-slots-text">
+              <span>${zone.available_slots}</span> available of <span>${zone.total_slots}</span> total slots
+            </div>
+            <div class="zone-actions">
+              <button class="btn-sm btn-open"  onclick="setStatus(${zone.zone_id}, 'available')">✓ Open</button>
+              <button class="btn-sm btn-maint" onclick="setStatus(${zone.zone_id}, 'maintenance')">⚠ Maintenance</button>
+              <button class="btn-sm btn-reset" onclick="resetZone(${zone.zone_id})">↺ Reset Slots</button>
+            </div>
+          </div>`;
+      });
+    } catch(e) {
+      document.getElementById('zonesAdminGrid').innerHTML = '<div class="empty-state">Could not load zones — make sure Flask is running.</div>';
+    }
+  }
+
+  // ── LOAD ACTIVE SESSIONS (LIVE) ──
+  let knownLogIds = new Set();
+
+  async function loadLogs() {
+    try {
+      const res   = await fetch(`${BASE_URL}/api/admin/logs`);
+      const data  = await res.json();
+      const tbody = document.getElementById('logsTableBody');
+
+      document.getElementById('statActive').textContent = data.count || 0;
+
+      if (!data.data || data.data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No active sessions right now.</td></tr>';
+        knownLogIds.clear();
+        return;
+      }
+
+      const newIds = new Set(data.data.map(l => l.log_id));
+
+      // Check for new arrivals
+      data.data.forEach(log => {
+        if (!knownLogIds.has(log.log_id)) {
+          showToast(`🚗 New check-in: ${log.vehicle_plate || 'Vehicle'} at Zone ${log.zone_id}`);
+        }
+      });
+
+      // Check for departures
+      knownLogIds.forEach(id => {
+        if (!newIds.has(id)) {
+          showToast(`✅ Check-out detected — session #${id} ended`);
+        }
+      });
+
+      knownLogIds = newIds;
+
+      tbody.innerHTML = data.data.map(log => {
+        // Calculate duration
+        const checkinTime = new Date(log.check_in_time);
+        const now = new Date();
+        const diffMin = Math.floor((now - checkinTime) / 60000);
+        const durStr = isNaN(diffMin) ? '--' :
+          diffMin >= 60 ? `${Math.floor(diffMin/60)}h ${diffMin%60}m` : `${diffMin}m`;
+        const isNew = !knownLogIds.has(log.log_id);
+        return `
+          <tr class="${isNew ? 'new-row' : ''}">
+            <td>#${log.log_id}</td>
+            <td>Zone ${log.zone_id}</td>
+            <td>${log.user_id}</td>
+            <td>${log.vehicle_plate || '—'}</td>
+            <td>${log.check_in_time}</td>
+            <td>${log.day_of_week}</td>
+            <td>${log.hour_of_day}:00</td>
+            <td style="color:#06d6a0">${durStr}</td>
+          </tr>`;
+      }).join('');
+
+    } catch(e) {
+      document.getElementById('logsTableBody').innerHTML =
+        '<tr><td colspan="8" class="empty-state">Could not load sessions — make sure Flask is running.</td></tr>';
+    }
+  }
+
+  // ── RESET ZONE ──
+  async function resetZone(zoneId) {
+    if (!confirm(`Reset all slots for Zone ${zoneId}? This will close all active sessions.`)) return;
+    try {
+      const res  = await fetch(`${BASE_URL}/api/admin/reset/${zoneId}`, { method: 'POST' });
+      const data = await res.json();
+      showToast(data.success ? `Zone ${zoneId} reset successfully.` : data.error, !data.success);
+      if (data.success) loadAll();
+    } catch(e) {
+      showToast('Reset failed — is the server running?', true);
+    }
+  }
+
+  // ── SET ZONE STATUS ──
+  async function setStatus(zoneId, status) {
+    try {
+      const res  = await fetch(`${BASE_URL}/api/admin/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ zone_id: zoneId, status })
+      });
+      const data = await res.json();
+      showToast(data.success ? `Zone ${zoneId} set to "${status}".` : data.error, !data.success);
+      if (data.success) loadAll();
+    } catch(e) {
+      showToast('Update failed — is the server running?', true);
+    }
+  }
+
+  // ── TOAST ──
+  function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className   = 'toast show' + (isError ? ' error' : '');
+    setTimeout(() => t.className = 'toast', 3500);
+  }
+
+  // ── LOAD ALL + AUTO REFRESH ──
+  function loadAll() {
+    loadStats();
+    loadZonesAdmin();
+    loadLogs();
+    countdownVal = 30;
+  }
+
+  // Auto refresh every 30 seconds
+  setInterval(loadAll, 30000);
 </script>
 
+<script src="../static/js/data.js"></script>
 </body>
 </html>
