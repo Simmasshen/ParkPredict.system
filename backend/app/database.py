@@ -78,6 +78,9 @@ try:
     )
     from db.admin import update_zone_status, reset_zone_slots
 
+    # Expose it as 'get_connection' so auth.py can find it
+    get_connection = get_db_connection
+
 except ImportError as e:
     raise ImportError(
         f"\n\n[ParkPredict] Connected to Nitesh's database folder but a required "
