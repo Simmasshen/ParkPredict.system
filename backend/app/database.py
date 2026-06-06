@@ -101,3 +101,27 @@ def init_db():
     create_tables()
     seed_zones()
     print("[DB] Connected to Nitesh's database. Ready.")
+
+
+# ── SQLite Connection for Users Table ──────────────────────────────────────
+def get_connection():
+    """
+    Return a SQLite connection to the local users database.
+    
+    This is SEPARATE from Nitesh's parking database.
+    Used ONLY by app/services/auth.py to manage user accounts (login/register).
+    
+    Database file: backend/users.db
+    Tables: users (user_id, username, password_hash, student_id, email, created_at)
+    
+    Returns:
+        sqlite3.Connection — with row_factory set to sqlite3.Row for dict-like rows
+        
+    Note:
+        check_same_thread=False allows the connection to be used across Flask's
+        threading model (safe for this use case with proper connection management).
+    """
+    db_path = os.path.join(os.path.dirname(__file__), "..", "users.db")
+    conn = sqlite3.connect(db_path, check_same_thread=False)
+    conn.row_factory = sqlite3.Row  # Makes rows behave like dicts
+    return conn
