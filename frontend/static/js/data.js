@@ -1,3 +1,5 @@
+const BASE_URL = "http://172.19.244.63:5000";
+
 const ZONES_MOCK = {
   FCI: { name: 'FCI Parking', location: 'Faculty of Computing & Informatics', total: 120, available: 80 },
   FOM: { name: 'FOM Parking', location: 'Faculty of Management',              total: 80,  available: 30 },
@@ -10,10 +12,23 @@ let ZONES = { ...ZONES_MOCK };
 // ── Fetch zone data from Flask API ──
 async function fetchZones() {
   try {
-    const res = await fetch('/api/zones');
+    const res = await fetch(`${BASE_URL}/api/zones/`);
     if (!res.ok) throw new Error('API error');
     const data = await res.json();
-    Object.assign(ZONES, data);
+    // Backend returns { success: true, data: [...] }
+    if (data.success && Array.isArray(data.data)) {
+      data.data.forEach(z => {
+        ZONES[z.zone_id] = {
+          name:      z.zone_name,
+          location:  z.location,
+          total:     z.total_slots,
+          available: z.available_slots,
+          status:    z.status
+        };
+      });
+    } else {
+      Object.assign(ZONES, data); // fallback for flat format
+    }
     console.log('[ParkPredict] Zones loaded from API');
   } catch (e) {
     console.warn('[ParkPredict] API unavailable, using mock data');
@@ -24,15 +39,16 @@ async function fetchZones() {
 // ── Fetch prediction from Flask API ──
 async function fetchPrediction(day, hour, zone = 'all') {
   try {
-    const res = await fetch(`/api/predict?day=${encodeURIComponent(day)}&hour=${hour}&zone=${zone}`);
+    const res = await fetch(`${BASE_URL}/api/recommendation/?day=${encodeURIComponent(day)}&hour=${hour}&zone=${zone}`);
     if (!res.ok) throw new Error('API error');
     return await res.json();
   } catch (e) {
+    // Fallback to local PEAK_MODEL
     const zoneKey = (zone === 'all') ? null : zone;
     const dayData = zoneKey
       ? (PEAK_MODEL[zoneKey]?.[day] || getPeakModelAvg(day))
       : getPeakModelAvg(day);
-    const idx  = Math.max(0, Math.min(13, hour - 7));
+    const idx       = Math.max(0, Math.min(13, hour - 7));
     const occupancy = dayData[idx];
     return { day, hour, zone, occupancy_pct: occupancy, availability_pct: 100 - occupancy };
   }
@@ -41,9 +57,11 @@ async function fetchPrediction(day, hour, zone = 'all') {
 // ── Fetch today's sessions from Flask API ──
 async function fetchSessions() {
   try {
-    const res = await fetch('/api/sessions');
+    const res = await fetch(`${BASE_URL}/api/parking/active`);
     if (!res.ok) throw new Error('API error');
-    return await res.json();
+    const data = await res.json();
+    if (data.success && Array.isArray(data.data)) return data.data;
+    return SESSIONS_DATA;
   } catch (e) {
     return SESSIONS_DATA;
   }
@@ -51,7 +69,7 @@ async function fetchSessions() {
 
 // ── POST check-in to Flask API ──
 async function apiCheckIn(payload) {
-  const res = await fetch('/api/checkin', {
+  const res = await fetch(`${BASE_URL}/api/parking/checkin`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
@@ -65,10 +83,10 @@ async function apiCheckIn(payload) {
 
 // ── POST check-out to Flask API ──
 async function apiCheckOut(sessionId) {
-  const res = await fetch('/api/checkout', {
+  const res = await fetch(`${BASE_URL}/api/parking/checkout`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ session_id: sessionId })
+    body: JSON.stringify({ log_id: sessionId })
   });
   if (!res.ok) {
     const err = await res.json();
@@ -80,7 +98,7 @@ async function apiCheckOut(sessionId) {
 // ── Simulate live changes (used when API is offline) ──
 function simulateLiveChanges() {
   Object.keys(ZONES).forEach(k => {
-    const z = ZONES[k];
+    const z     = ZONES[k];
     const delta = Math.floor(Math.random() * 7) - 3;
     z.available = Math.max(0, Math.min(z.total, z.available + delta));
   });
@@ -168,3 +186,4 @@ if (typeof Chart !== 'undefined') {
   Chart.defaults.borderColor = '#1e2740';
   Chart.defaults.font.family = "'DM Sans', sans-serif";
 }
+
