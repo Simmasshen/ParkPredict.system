@@ -34,6 +34,26 @@ HOW TO SET UP (both Pirai and Nitesh do this once):
 
 import sys
 import os
+import sqlite3
+
+# Explicit module exports for clarity
+__all__ = [
+    "init_db",
+    "get_connection",
+    "create_tables",
+    "seed_zones",
+    "check_in",
+    "check_out",
+    "get_all_zones",
+    "get_zone_by_id",
+    "get_active_logs",
+    "get_logs_by_user",
+    "get_daily_stats",
+    "get_peak_hours",
+    "get_prediction_data",
+    "update_zone_status",
+    "reset_zone_slots",
+]
 
 # ── Locate Nitesh's database folder ───────────────────────────────────────
 # Goes up: database.py → app/ → backend/ → parkpredict/ → then into database/
@@ -78,9 +98,6 @@ try:
     )
     from db.admin import update_zone_status, reset_zone_slots
 
-    # Expose it as 'get_connection' so auth.py can find it
-    get_connection = get_db_connection
-
 except ImportError as e:
     raise ImportError(
         f"\n\n[ParkPredict] Connected to Nitesh's database folder but a required "
@@ -101,3 +118,28 @@ def init_db():
     create_tables()
     seed_zones()
     print("[DB] Connected to Nitesh's database. Ready.")
+
+
+# ── SQLite Connection for Users Table ──────────────────────────────────────
+def get_connection():
+    """
+    Return a SQLite connection to the local users database.
+    
+    This is SEPARATE from Nitesh's parking database.
+    Used ONLY by app/services/auth.py to manage user accounts (login/register).
+    
+    Database file: backend/users.db
+    Tables: users (user_id, username, password_hash, student_id, email, created_at)
+    
+    Returns:
+        sqlite3.Connection — with row_factory set to sqlite3.Row for dict-like rows
+        
+    Note:
+        check_same_thread=False allows the connection to be used across Flask's
+        threading model (safe for this use case with proper connection management).
+    """
+    db_path = os.path.join(os.path.dirname(__file__), "..", "users.db")
+    conn = sqlite3.connect(db_path, check_same_thread=False)
+    conn.row_factory = sqlite3.Row  # Makes rows behave like dicts
+    return conn
+
