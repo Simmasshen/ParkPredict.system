@@ -5,33 +5,31 @@ Creates all tables and indexes.
 Safe to call on every app startup (uses IF NOT EXISTS).
 
 Tables:
-  - parking_zones   : static + live info for each parking area
-  - parking_logs    : every check-in / check-out event
+  - parking_zones    : static + live info for each parking area
+  - parking_logs     : every check-in / check-out event
+  - admin_logs       : every admin action (audit trail)
+  - zone_capacity_history : history of slot changes over time
 
-Indexes (for query performance):
-  - idx_logs_zone_id       : speeds up queries filtering by zone
-  - idx_logs_check_in_time : speeds up date-range analytics queries
-  - idx_logs_user_id       : speeds up user history lookups
-  - idx_logs_checkout_null : speeds up active session queries
-  - idx_logs_day_hour      : speeds up peak hour GROUP BY queries
+Indexes:
+  - idx_logs_zone_id, check_in_time, user_id, checkout_null, day_hour
+  - idx_admin_zone_id, admin_logs_time
+  - idx_capacity_zone_id
 """
 
 from db.connection import get_connection
 
 
 def create_tables():
-    """Create parking_zones and parking_logs tables + indexes if they don't exist."""
+    """Create all tables and indexes if they don't exist."""
 
     conn   = get_connection()
     cursor = conn.cursor()
 
     # ── TABLE 1: parking_zones ─────────────────────────────────────────────
-    # Stores static info (name, location, capacity) and live slot count.
-    # Normalization: zone info is separated from logs — no duplication.
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS parking_zones (
             zone_id         INTEGER PRIMARY KEY AUTOINCREMENT,
-            zone_name       TEXT    NOT NULL UNIQUE,          -- UNIQUE enforces no duplicate zone names
+            zone_name       TEXT    NOT NULL UNIQUE,
             location        TEXT    NOT NULL,
             total_slots     INTEGER NOT NULL CHECK(total_slots > 0),
             available_slots INTEGER NOT NULL CHECK(available_slots >= 0),
@@ -42,9 +40,6 @@ def create_tables():
     """)
 
     # ── TABLE 2: parking_logs ──────────────────────────────────────────────
-    # One row per parking session. check_out_time is NULL while car is parked.
-    # day_of_week and hour_of_day are stored at insert time for fast analytics.
-    # Normalization: zone details stored once in parking_zones, referenced here by zone_id only.
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS parking_logs (
             log_id           INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,47 +47,60 @@ def create_tables():
             user_id          TEXT     NOT NULL,
             vehicle_plate    TEXT,
             check_in_time    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            check_out_time   DATETIME,                        -- NULL = still parked
-            duration_minutes INTEGER,                         -- calculated on check-out
-            day_of_week      TEXT     NOT NULL,               -- stored at insert for fast GROUP BY
+            check_out_time   DATETIME,
+            duration_minutes INTEGER,
+            day_of_week      TEXT     NOT NULL,
             hour_of_day      INTEGER  NOT NULL CHECK(hour_of_day BETWEEN 0 AND 23),
-            FOREIGN KEY (zone_id) REFERENCES parking_zones(zone_id)  -- enforces referential integrity
+            FOREIGN KEY (zone_id) REFERENCES parking_zones(zone_id)
+        )
+    """)
+
+    # ── TABLE 3: admin_logs ────────────────────────────────────────────────
+    # Audit trail — every admin action is recorded.
+    # Pirai uses GET /api/admin/audit to show this on the admin page.
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS admin_logs (
+            action_id    INTEGER PRIMARY KEY AUTOINCREMENT,
+            zone_id      INTEGER,
+            action       TEXT    NOT NULL,
+            old_value    TEXT,
+            new_value    TEXT,
+            performed_by TEXT    NOT NULL DEFAULT 'admin',
+            action_time  DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (zone_id) REFERENCES parking_zones(zone_id)
+        )
+    """)
+
+    # ── TABLE 4: zone_capacity_history ─────────────────────────────────────
+    # Tracks slot count over time — used for occupancy trend charts.
+    # Recorded every time check-in or check-out happens.
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS zone_capacity_history (
+            history_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+            zone_id         INTEGER NOT NULL,
+            available_slots INTEGER NOT NULL,
+            total_slots     INTEGER NOT NULL,
+            recorded_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (zone_id) REFERENCES parking_zones(zone_id)
         )
     """)
 
     # ── INDEXES ───────────────────────────────────────────────────────────
-    # Indexes speed up SELECT queries that filter or sort by these columns.
-    # Without indexes, SQLite scans every row — slow when data grows large.
 
-    # 1. Speed up: get_active_logs(zone_id) — filters by zone_id
-    cursor.execute("""
-        CREATE INDEX IF NOT EXISTS idx_logs_zone_id
-        ON parking_logs(zone_id)
-    """)
+    # parking_logs indexes
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_zone_id        ON parking_logs(zone_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_check_in_time  ON parking_logs(check_in_time)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_user_id        ON parking_logs(user_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_checkout_null  ON parking_logs(check_out_time)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_day_hour       ON parking_logs(day_of_week, hour_of_day)")
 
-    # 2. Speed up: get_peak_hours() — filters by check_in_time date range
-    cursor.execute("""
-        CREATE INDEX IF NOT EXISTS idx_logs_check_in_time
-        ON parking_logs(check_in_time)
-    """)
+    # admin_logs indexes
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_admin_zone_id   ON admin_logs(zone_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_admin_logs_time ON admin_logs(action_time)")
 
-    # 3. Speed up: get_logs_by_user() — filters by user_id
-    cursor.execute("""
-        CREATE INDEX IF NOT EXISTS idx_logs_user_id
-        ON parking_logs(user_id)
-    """)
-
-    # 4. Speed up: get_active_logs() — filters WHERE check_out_time IS NULL
-    cursor.execute("""
-        CREATE INDEX IF NOT EXISTS idx_logs_checkout_null
-        ON parking_logs(check_out_time)
-    """)
-
-    # 5. Speed up: get_peak_hours() & get_prediction_data() — GROUP BY day/hour
-    cursor.execute("""
-        CREATE INDEX IF NOT EXISTS idx_logs_day_hour
-        ON parking_logs(day_of_week, hour_of_day)
-    """)
+    # zone_capacity_history indexes
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_capacity_zone_id   ON zone_capacity_history(zone_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_capacity_recorded  ON zone_capacity_history(recorded_at)")
 
     conn.commit()
     conn.close()

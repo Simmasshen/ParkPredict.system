@@ -2,6 +2,7 @@
 ParkPredict — Parking Operations
 ==================================
 Handles all check-in and check-out logic.
+Now records capacity history on every transaction.
 
 Functions:
   check_in(zone_id, user_id, vehicle_plate)  → insert log + update zone
@@ -12,22 +13,38 @@ from datetime import datetime
 from db.connection import get_connection
 
 
+def _record_capacity(cursor, zone_id: int):
+    """
+    Snapshot the current slot count into zone_capacity_history.
+    Called after every check-in and check-out.
+    Used by Bala's real-time chart and admin dashboard.
+    """
+    cursor.execute("""
+        INSERT INTO zone_capacity_history (zone_id, available_slots, total_slots)
+        SELECT zone_id, available_slots, total_slots
+        FROM   parking_zones
+        WHERE  zone_id = ?
+    """, (zone_id,))
+
+
 def check_in(zone_id: int, user_id: str, vehicle_plate: str = None) -> dict:
     """
     Record a user checking in to a parking zone.
 
     Steps:
-      1. Verify the zone exists and has available slots.
-      2. Insert a new row in parking_logs.
-      3. Decrement available_slots; mark zone 'full' if needed.
+      1. Verify zone exists and has available slots.
+      2. Block double check-in — same user can't park twice.
+      3. Insert a new row in parking_logs.
+      4. Decrement available_slots; mark zone 'full' if needed.
+      5. Record capacity snapshot for real-time chart.
 
     Returns:
       dict { success, log_id, zone_name, check_in, slots_left }
       or   { success: False, error: "..." }
     """
     now         = datetime.now()
-    day_of_week = now.strftime("%A")   # e.g. 'Monday'
-    hour_of_day = now.hour             # 0–23
+    day_of_week = now.strftime("%A")
+    hour_of_day = now.hour
 
     conn   = get_connection()
     cursor = conn.cursor()
@@ -36,8 +53,7 @@ def check_in(zone_id: int, user_id: str, vehicle_plate: str = None) -> dict:
         # 1. Validate zone
         cursor.execute("""
             SELECT zone_id, zone_name, available_slots, status
-            FROM   parking_zones
-            WHERE  zone_id = ?
+            FROM   parking_zones WHERE zone_id = ?
         """, (zone_id,))
         zone = cursor.fetchone()
 
@@ -48,16 +64,16 @@ def check_in(zone_id: int, user_id: str, vehicle_plate: str = None) -> dict:
         if zone["status"] == "maintenance":
             return {"success": False, "error": f"{zone['zone_name']} is under maintenance."}
 
-        # Block double check-in: same user cannot have two active sessions
+        # 2. Block double check-in
         cursor.execute("""
             SELECT log_id FROM parking_logs
             WHERE  user_id = ? AND check_out_time IS NULL
         """, (user_id,))
         if cursor.fetchone():
             return {"success": False,
-                    "error": "User already has an active parking session. Please check out first."}
+                    "error": "You already have an active parking session. Please check out first."}
 
-        # 2. Insert log
+        # 3. Insert log
         cursor.execute("""
             INSERT INTO parking_logs
                 (zone_id, user_id, vehicle_plate, check_in_time, day_of_week, hour_of_day)
@@ -67,17 +83,18 @@ def check_in(zone_id: int, user_id: str, vehicle_plate: str = None) -> dict:
 
         log_id = cursor.lastrowid
 
-        # 3. Update zone
+        # 4. Update zone
         new_slots  = zone["available_slots"] - 1
         new_status = "full" if new_slots == 0 else "available"
 
         cursor.execute("""
             UPDATE parking_zones
-            SET    available_slots = ?,
-                   status          = ?,
-                   last_updated    = CURRENT_TIMESTAMP
+            SET    available_slots = ?, status = ?, last_updated = CURRENT_TIMESTAMP
             WHERE  zone_id = ?
         """, (new_slots, new_status, zone_id))
+
+        # 5. Record capacity snapshot for real-time chart
+        _record_capacity(cursor, zone_id)
 
         conn.commit()
         return {
@@ -103,11 +120,12 @@ def check_out(log_id: int) -> dict:
     Steps:
       1. Fetch the open log (check_out_time IS NULL).
       2. Calculate parking duration in minutes.
-      3. Update the log with check-out time and duration.
+      3. Update log with check-out time and duration.
       4. Increment available_slots in parking_zones.
+      5. Record capacity snapshot for real-time chart.
 
     Returns:
-      dict { success, log_id, check_out, duration_minutes }
+      dict { success, log_id, zone_name, check_out, duration_minutes }
       or   { success: False, error: "..." }
     """
     now = datetime.now()
@@ -118,9 +136,10 @@ def check_out(log_id: int) -> dict:
     try:
         # 1. Fetch open log
         cursor.execute("""
-            SELECT log_id, zone_id, check_in_time
-            FROM   parking_logs
-            WHERE  log_id = ? AND check_out_time IS NULL
+            SELECT pl.log_id, pl.zone_id, pl.check_in_time, pz.zone_name
+            FROM   parking_logs pl
+            JOIN   parking_zones pz ON pl.zone_id = pz.zone_id
+            WHERE  pl.log_id = ? AND pl.check_out_time IS NULL
         """, (log_id,))
         log = cursor.fetchone()
 
@@ -135,8 +154,7 @@ def check_out(log_id: int) -> dict:
         # 3. Update log
         cursor.execute("""
             UPDATE parking_logs
-            SET    check_out_time   = ?,
-                   duration_minutes = ?
+            SET    check_out_time = ?, duration_minutes = ?
             WHERE  log_id = ?
         """, (now.strftime("%Y-%m-%d %H:%M:%S"), duration_minutes, log_id))
 
@@ -149,10 +167,14 @@ def check_out(log_id: int) -> dict:
             WHERE  zone_id = ?
         """, (log["zone_id"],))
 
+        # 5. Record capacity snapshot
+        _record_capacity(cursor, log["zone_id"])
+
         conn.commit()
         return {
             "success":          True,
             "log_id":           log_id,
+            "zone_name":        log["zone_name"],
             "check_out":        now.strftime("%Y-%m-%d %H:%M:%S"),
             "duration_minutes": duration_minutes,
         }
