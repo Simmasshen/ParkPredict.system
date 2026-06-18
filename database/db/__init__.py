@@ -1,17 +1,6 @@
 """
 ParkPredict — db package
-=========================
-Exports every function Pirai's backend needs.
-
-Pirai imports from here via database.py:
-  - create_tables()
-  - seed_zones()
-  - check_in(), check_out()
-  - get_all_zones(), get_zone_by_id()
-  - get_active_logs(), get_logs_by_user()
-  - get_peak_hours(), get_prediction_data()
-  - get_daily_stats()
-  - update_zone_status(), reset_zone_slots()
+Exports every function the backend needs.
 """
 
 from db.schema     import create_tables
@@ -43,14 +32,11 @@ def setup():
 
 
 __all__ = [
-    # Setup
     "setup",
     "create_tables",
     "seed_zones",
-    # Operations — used by Pirai's parking.py
     "check_in",
     "check_out",
-    # Queries — used by Pirai's zones.py, parking.py, analytics.py, recommendation.py
     "get_all_zones",
     "get_zone_by_id",
     "get_active_logs",
@@ -58,7 +44,6 @@ __all__ = [
     "get_peak_hours",
     "get_prediction_data",
     "get_daily_stats",
-    # Admin — used by Pirai's admin.py
     "update_zone_status",
     "reset_zone_slots",
     "update_zone_capacity",

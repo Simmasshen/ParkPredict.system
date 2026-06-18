@@ -1,23 +1,20 @@
 """
 ParkPredict — Seed Data
-=========================
 Populates parking_zones with default MMU Cyberjaya zones.
-Uses INSERT OR IGNORE so it is safe to run multiple times.
 """
 
 from db.connection import get_connection
 
-# Default parking zones for MMU Cyberjaya
 ZONES = [
-    ("Zone A", "FCI Parking", 120),
-    ("Zone B", "FOM Parking", 80),
-    ("Zone C", "DTC Parking", 100),
+    ("Zone A", "FCI Parking – Faculty of Computing & Informatics", 120),
+    ("Zone B", "FOM Parking – Faculty of Management", 80),
+    ("Zone C", "DTC Parking – Chancellor Hall / DTC", 100),
 ]
 
 
 def seed_zones():
     """Insert default zones if they don't already exist."""
-    conn = get_connection()
+    conn   = get_connection()
     cursor = conn.cursor()
 
     for zone_name, location, total in ZONES:
