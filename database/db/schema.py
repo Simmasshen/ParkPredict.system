@@ -1,19 +1,7 @@
 """
 ParkPredict — Database Schema
-===============================
 Creates all tables and indexes.
 Safe to call on every app startup (uses IF NOT EXISTS).
-
-Tables:
-  - parking_zones    : static + live info for each parking area
-  - parking_logs     : every check-in / check-out event
-  - admin_logs       : every admin action (audit trail)
-  - zone_capacity_history : history of slot changes over time
-
-Indexes:
-  - idx_logs_zone_id, check_in_time, user_id, checkout_null, day_hour
-  - idx_admin_zone_id, admin_logs_time
-  - idx_capacity_zone_id
 """
 
 from db.connection import get_connection
@@ -56,8 +44,6 @@ def create_tables():
     """)
 
     # ── TABLE 3: admin_logs ────────────────────────────────────────────────
-    # Audit trail — every admin action is recorded.
-    # Pirai uses GET /api/admin/audit to show this on the admin page.
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS admin_logs (
             action_id    INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -72,8 +58,6 @@ def create_tables():
     """)
 
     # ── TABLE 4: zone_capacity_history ─────────────────────────────────────
-    # Tracks slot count over time — used for occupancy trend charts.
-    # Recorded every time check-in or check-out happens.
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS zone_capacity_history (
             history_id      INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -85,22 +69,31 @@ def create_tables():
         )
     """)
 
-    # ── INDEXES ───────────────────────────────────────────────────────────
+    # ── TABLE 5: users ────────────────────────────────────────────────────
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            user_id       INTEGER  PRIMARY KEY AUTOINCREMENT,
+            username      TEXT     NOT NULL UNIQUE,
+            password_hash TEXT     NOT NULL,
+            student_id    TEXT,
+            email         TEXT,
+            role          TEXT     NOT NULL DEFAULT 'user'
+                              CHECK(role IN ('user', 'admin')),
+            created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
 
-    # parking_logs indexes
+    # ── INDEXES ───────────────────────────────────────────────────────────
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_zone_id        ON parking_logs(zone_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_check_in_time  ON parking_logs(check_in_time)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_user_id        ON parking_logs(user_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_checkout_null  ON parking_logs(check_out_time)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_day_hour       ON parking_logs(day_of_week, hour_of_day)")
-
-    # admin_logs indexes
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_admin_zone_id   ON admin_logs(zone_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_admin_logs_time ON admin_logs(action_time)")
-
-    # zone_capacity_history indexes
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_capacity_zone_id   ON zone_capacity_history(zone_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_capacity_recorded  ON zone_capacity_history(recorded_at)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_admin_zone_id       ON admin_logs(zone_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_admin_logs_time     ON admin_logs(action_time)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_capacity_zone_id    ON zone_capacity_history(zone_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_capacity_recorded   ON zone_capacity_history(recorded_at)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_username      ON users(username)")
 
     conn.commit()
     conn.close()
