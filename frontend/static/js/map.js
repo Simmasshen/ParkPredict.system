@@ -1,24 +1,23 @@
 const ZONE_COLORS = {
   FCI: '#3b82f6', FOM: '#f59e0b', DTC: '#22c55e'
 };
- 
-// Map the ZONES keys (FCI, FOM, DTC) to SVG element IDs
+
 const ZONE_SVG_MAP = {
   FCI: 'map-zone-fci',
   FOM: 'map-zone-fom',
   DTC: 'map-zone-dtc'
 };
- 
+
 function updateMapZones() {
+  // ZONES is keyed FCI/FOM/DTC (guaranteed by data.js fetchZones fix)
   Object.entries(ZONES).forEach(([key, zone]) => {
-    const pct = zone.available / zone.total;
+    if (!['FCI','FOM','DTC'].includes(key)) return;
+    const pct   = zone.available / zone.total;
     const color = pct > 0.5 ? '#22c55e' : pct > 0.2 ? '#f59e0b' : '#ef4444';
- 
-    // Update slot text badge inside SVG
+
     const slotEl = document.getElementById(`map-slots-${key.toLowerCase()}`);
     if (slotEl) slotEl.textContent = `${zone.available}/${zone.total}`;
- 
-    // Update clickable zone border/fill colors
+
     const svgId = ZONE_SVG_MAP[key];
     if (svgId) {
       const group = document.getElementById(svgId);
@@ -28,7 +27,6 @@ function updateMapZones() {
           rect.setAttribute('fill', color + '14');
           rect.setAttribute('stroke', color);
         }
-        // Update badge rect color
         const badges = group.querySelectorAll('rect:not(.zone-rect)');
         badges.forEach(b => {
           if (!b.hasAttribute('class')) b.setAttribute('fill', color);
@@ -37,15 +35,18 @@ function updateMapZones() {
     }
   });
 }
- 
+
 function renderZoneList() {
   const list = document.getElementById('zoneList');
   if (!list) return;
   list.innerHTML = '';
-  Object.entries(ZONES).forEach(([key, zone]) => {
-    const pct = zone.available / zone.total;
-    const color = getZoneColor(pct);
+  ['FCI','FOM','DTC'].forEach(key => {
+    const zone = ZONES[key];
+    if (!zone) return;
+    const pct      = zone.available / zone.total;
+    const color    = getZoneColor(pct);
     const colorHex = color === 'green' ? '#22c55e' : color === 'yellow' ? '#f59e0b' : '#ef4444';
+    const statusTxt = zone.status === 'maintenance' ? '🔧 Maintenance' : getZoneLabel(pct);
     list.innerHTML += `
       <div class="zone-list-item" onclick="showZoneInfo('${key}')" style="cursor:pointer">
         <span class="zname" style="color:${colorHex}">${zone.name}</span>
@@ -54,23 +55,18 @@ function renderZoneList() {
     `;
   });
 }
- 
+
 function showZoneInfo(key) {
   const zone = ZONES[key];
   if (!zone) return;
-  const pct = zone.available / zone.total;
-  const color = getZoneColor(pct);
+  const pct      = zone.available / zone.total;
+  const color    = getZoneColor(pct);
   const colorHex = color === 'green' ? '#22c55e' : color === 'yellow' ? '#f59e0b' : '#ef4444';
-  const label = getZoneLabel(pct);
+  const label    = zone.status === 'maintenance' ? 'Maintenance' : getZoneLabel(pct);
   const occupiedPct = Math.round((1 - pct) * 100);
- 
-  // Badge for primary zones
-  const isPrimary = ['FCI','FOM','DTC'].includes(key);
-  const badgeHtml = isPrimary
-    ? `<div style="margin-bottom:8px"><span style="background:${colorHex}22;color:${colorHex};border:1px solid ${colorHex}44;border-radius:99px;padding:2px 10px;font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.1em">${label.toUpperCase()}</span></div>`
-    : '';
- 
-  // Trend hint for primary zones
+
+  const badgeHtml = `<div style="margin-bottom:8px"><span style="background:${colorHex}22;color:${colorHex};border:1px solid ${colorHex}44;border-radius:99px;padding:2px 10px;font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.1em">${label.toUpperCase()}</span></div>`;
+
   const trendHints = {
     FCI: 'Busiest during 8–10 AM & 2–4 PM',
     FOM: 'Peak usage during lunch hours',
@@ -79,7 +75,7 @@ function showZoneInfo(key) {
   const trendHtml = trendHints[key]
     ? `<div style="margin-top:6px;font-size:0.72rem;color:var(--text3);display:flex;align-items:center;gap:5px"><span>📈</span>${trendHints[key]}</div>`
     : '';
- 
+
   document.getElementById('popupZoneName').textContent = zone.name;
   document.getElementById('popupZoneName').style.color = colorHex;
   document.getElementById('popupBody').innerHTML = `
@@ -101,13 +97,14 @@ function showZoneInfo(key) {
   `;
   document.getElementById('zonePopup').style.display = 'block';
 }
- 
-// Init
+
+// Init + live refresh
 updateMapZones();
 renderZoneList();
- 
+
 setInterval(() => {
-  simulateLiveChanges();
-  updateMapZones();
-  renderZoneList();
+  fetchZones().then(() => {
+    updateMapZones();
+    renderZoneList();
+  });
 }, 30000);

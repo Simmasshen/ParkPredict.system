@@ -295,6 +295,11 @@
   </style>
 </head>
 <body>
+<!-- MMU Top Bar -->
+<div class="mmu-logo-bar" style="display:flex;align-items:center;gap:10px;padding:6px 12px;background:rgba(0,35,91,0.5);border-bottom:1px solid rgba(255,215,0,0.15);">
+  <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="48" fill="#00235B" stroke="#FFD700" stroke-width="3"/><text x="50" y="42" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="#FFD700">MMU</text><text x="50" y="62" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#FFFFFF" letter-spacing="1">MULTIMEDIA</text><text x="50" y="73" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#FFFFFF" letter-spacing="1">UNIVERSITY</text></svg>
+  <span style="font-family:DM Sans,sans-serif;font-size:0.72rem;color:#FFD700;letter-spacing:0.08em;font-weight:600;">MULTIMEDIA UNIVERSITY · CYBERJAYA CAMPUS</span>
+</div>
 
 <!-- ══════════════════════════════════════
      ADMIN GATE — Password Protection
@@ -410,7 +415,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const BASE_URL = "http://172.19.244.63:5000";
+  const BASE_URL = "http://localhost:5000";
 
   // ── ADMIN PASSWORD ──
   // Change this to whatever password you want
@@ -640,11 +645,42 @@
     setTimeout(() => t.className = 'toast', 3500);
   }
 
+  // ── AUDIT LOG ──
+  async function loadAudit() {
+    const tbody = document.getElementById('auditBody');
+    if (!tbody) return;
+    try {
+      const res  = await fetch(`${BASE_URL}/api/admin/audit?limit=30`);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      tbody.innerHTML = '';
+      if (!data.data.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#5a6080;padding:2rem">No admin actions recorded yet.</td></tr>';
+        return;
+      }
+      data.data.forEach(a => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td style="font-family:var(--font-mono);font-size:0.75rem">${a.action_time || '–'}</td>
+          <td><span style="color:var(--accent2)">${a.zone_name || 'All'}</span></td>
+          <td><span style="font-family:var(--font-mono);font-size:0.7rem;color:#f59e0b">${a.action}</span></td>
+          <td style="font-family:var(--font-mono);font-size:0.72rem;color:var(--text3)">${a.old_value || '–'}</td>
+          <td style="font-family:var(--font-mono);font-size:0.72rem;color:#22c55e">${a.new_value || '–'}</td>
+          <td style="font-size:0.75rem;color:var(--text3)">${a.performed_by || 'admin'}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    } catch (e) {
+      if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="color:#ef4444;padding:1rem">Failed to load audit log: ${e.message}</td></tr>`;
+    }
+  }
+
   // ── LOAD ALL + AUTO REFRESH ──
   function loadAll() {
     loadStats();
     loadZonesAdmin();
     loadLogs();
+    loadAudit();
     countdownVal = 30;
   }
 
