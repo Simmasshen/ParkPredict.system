@@ -8,8 +8,39 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .mmu-logo-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px;
+      background: rgba(0,35,91,0.5);
+      border-bottom: 1px solid rgba(255,215,0,0.15);
+    }
+    .mmu-logo-bar img { height: 28px; }
+    .mmu-logo-bar span {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      color: #FFD700;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+    }
+  </style>
 </head>
 <body>
+
+<!-- MMU Top Bar -->
+<div class="mmu-logo-bar">
+  <!-- MMU Logo SVG inline -->
+  <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="48" fill="#00235B" stroke="#FFD700" stroke-width="3"/>
+    <text x="50" y="42" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="#FFD700">MMU</text>
+    <text x="50" y="62" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#FFFFFF" letter-spacing="1">MULTIMEDIA</text>
+    <text x="50" y="73" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#FFFFFF" letter-spacing="1">UNIVERSITY</text>
+  </svg>
+  <span>MULTIMEDIA UNIVERSITY · CYBERJAYA CAMPUS</span>
+</div>
+
 <nav class="navbar">
   <div class="nav-logo">
     <span class="logo-pp">PARK</span><span class="logo-predict">PREDICT</span>
@@ -33,7 +64,7 @@
   <div class="hero-content">
     <div class="hero-tag">LIVE SYSTEM</div>
     <h1 class="hero-title">Smart Parking<br><span>Intelligence</span></h1>
-    <p class="hero-sub">Real-time availability & AI-powered predictions for MMU Cyberjaya campus parking.</p>
+    <p class="hero-sub">Real-time availability &amp; AI-powered predictions for MMU Cyberjaya campus parking.</p>
     <div class="hero-actions">
       <a href="checkin.html" class="btn-primary">Check In Now</a>
       <a href="map.html" class="btn-outline">View Map</a>
@@ -91,15 +122,17 @@
       </select>
       <label>Time</label>
       <select id="qTime">
-        <option>7:00 AM</option><option>8:00 AM</option><option>9:00 AM</option>
-        <option>10:00 AM</option><option>11:00 AM</option><option>12:00 PM</option>
-        <option>1:00 PM</option><option>2:00 PM</option><option>3:00 PM</option>
-        <option>4:00 PM</option><option>5:00 PM</option><option>6:00 PM</option>
+        <option value="7">7:00 AM</option><option value="8">8:00 AM</option>
+        <option value="9">9:00 AM</option><option value="10">10:00 AM</option>
+        <option value="11">11:00 AM</option><option value="12">12:00 PM</option>
+        <option value="13">1:00 PM</option><option value="14">2:00 PM</option>
+        <option value="15">3:00 PM</option><option value="16">4:00 PM</option>
+        <option value="17">5:00 PM</option><option value="18">6:00 PM</option>
       </select>
       <button class="btn-primary" onclick="quickPredict()">Predict</button>
     </div>
     <div class="predict-result" id="qResult">
-      <div class="predict-placeholder">Select day & time to see prediction</div>
+      <div class="predict-placeholder">Select day &amp; time to see prediction</div>
     </div>
   </div>
 </section>
@@ -110,6 +143,7 @@
     <div>
       <span class="logo-pp">PARK</span><span class="logo-predict">PREDICT</span>
       <p>Smart parking for MMU Cyberjaya</p>
+      <p style="font-size:0.72rem;color:#5a6080;margin-top:4px">Multimedia University · Jalan Multimedia, Cyberjaya</p>
     </div>
     <div class="footer-links">
       <a href="index.html">Dashboard</a>

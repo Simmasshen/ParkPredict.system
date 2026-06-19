@@ -7,7 +7,30 @@
   <link rel="stylesheet" href="../static/css/style.css"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-  <nav class="navbar">
+  <style>
+    .mmu-logo-bar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 12px;
+      background: rgba(0,35,91,0.5);
+      border-bottom: 1px solid rgba(255,215,0,0.15);
+    }
+    .mmu-logo-bar span { font-family:'DM Sans',sans-serif; font-size:0.72rem; color:#FFD700; letter-spacing:0.08em; font-weight:600; }
+  </style>
+</head>
+<body>
+
+<!-- MMU Top Bar -->
+<div class="mmu-logo-bar">
+  <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="48" fill="#00235B" stroke="#FFD700" stroke-width="3"/>
+    <text x="50" y="42" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" fill="#FFD700">MMU</text>
+    <text x="50" y="62" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#FFFFFF" letter-spacing="1">MULTIMEDIA</text>
+    <text x="50" y="73" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#FFFFFF" letter-spacing="1">UNIVERSITY</text>
+  </svg>
+  <span>MULTIMEDIA UNIVERSITY · CYBERJAYA CAMPUS</span>
+</div>
+
+<nav class="navbar">
   <div class="nav-logo">
     <span class="logo-pp">PARK</span><span class="logo-predict">PREDICT</span>
     <span class="nav-badge">MMU Cyberjaya</span>
@@ -44,7 +67,6 @@
     <div class="map-tip">
       <span>💡</span> Click FCI, FOM or DTC zone on the map for details
     </div>
-    <!-- MMU Info Box -->
     <div style="margin-top:1.5rem;background:rgba(0,35,91,0.25);border:1px solid rgba(255,215,0,0.2);border-radius:8px;padding:0.85rem;font-size:0.75rem;color:var(--text3)">
       <div style="color:#FFD700;font-family:'Bebas Neue',sans-serif;letter-spacing:0.08em;font-size:0.8rem;margin-bottom:5px">🎓 MMU CAMPUS INFO</div>
       <div style="line-height:1.7">
@@ -61,10 +83,9 @@
     <div class="map-title-bar">MMU Cyberjaya Campus · Parking Overview</div>
     <svg id="campusMap" viewBox="0 0 900 620" xmlns="http://www.w3.org/2000/svg" class="campus-svg">
 
-      <!-- Campus ground -->
       <rect x="0" y="0" width="900" height="620" fill="#0f1117" rx="12"/>
 
-      <!-- Road network -->
+      <!-- Roads -->
       <g class="roads" fill="none" stroke="#2a2f3e" stroke-width="18" stroke-linecap="round">
         <path d="M80 100 Q80 60 130 60 L770 60 Q820 60 820 110 L820 510 Q820 560 770 560 L130 560 Q80 560 80 510 Z"/>
         <line x1="80" y1="300" x2="820" y2="300"/>
@@ -72,8 +93,6 @@
         <line x1="200" y1="60" x2="200" y2="560"/>
         <line x1="680" y1="60" x2="680" y2="560"/>
       </g>
-
-      <!-- Road center lines -->
       <g fill="none" stroke="#3a3f50" stroke-width="2" stroke-dasharray="12,8">
         <line x1="80" y1="300" x2="820" y2="300"/>
         <line x1="450" y1="60" x2="450" y2="560"/>
@@ -81,88 +100,71 @@
         <line x1="680" y1="60" x2="680" y2="560"/>
       </g>
 
-      <!-- ===== BUILDINGS ===== -->
-      <!-- FCI / Faculty of Computing -->
+      <!-- Buildings -->
       <rect x="240" y="90" width="170" height="120" rx="6" fill="#1e2235" stroke="#3b4268" stroke-width="1.5"/>
       <text x="325" y="148" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#8892b0" font-weight="600">FCI</text>
       <text x="325" y="162" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#5a6080">Faculty of Computing</text>
       <rect x="240" y="90" width="170" height="6" rx="3" fill="#3b4268"/>
 
-      <!-- FOM / Faculty of Management -->
       <rect x="490" y="90" width="160" height="100" rx="6" fill="#1e2235" stroke="#3b4268" stroke-width="1.5"/>
       <text x="570" y="136" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#8892b0" font-weight="600">FOM</text>
       <text x="570" y="150" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#5a6080">Faculty of Management</text>
       <rect x="490" y="90" width="160" height="6" rx="3" fill="#3b4268"/>
 
-      <!-- Library -->
       <rect x="330" y="240" width="130" height="100" rx="6" fill="#1a1f30" stroke="#2d3455" stroke-width="1.5"/>
       <text x="395" y="285" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#8892b0" font-weight="600">📚 LIBRARY</text>
       <text x="395" y="299" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#5a6080">MMU Library</text>
       <rect x="330" y="240" width="130" height="6" rx="3" fill="#2d3455"/>
 
-      <!-- Chancellor Hall -->
       <rect x="360" y="380" width="150" height="90" rx="6" fill="#1e2235" stroke="#4a3560" stroke-width="1.5"/>
       <text x="435" y="420" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#8892b0" font-weight="600">DTC</text>
       <text x="435" y="434" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#5a6080">Chancellor Hall</text>
       <rect x="360" y="380" width="150" height="6" rx="3" fill="#4a3560"/>
 
-      <!-- Student Services -->
       <rect x="100" y="200" width="80" height="70" rx="6" fill="#1e2235" stroke="#3b4268" stroke-width="1.5"/>
       <text x="140" y="232" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#8892b0" font-weight="600">STUDENT</text>
       <text x="140" y="244" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#5a6080">SERVICES</text>
 
-      <!-- Sports Complex -->
       <rect x="710" y="200" width="90" height="80" rx="6" fill="#1a2520" stroke="#2a4035" stroke-width="1.5"/>
       <text x="755" y="236" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#8892b0" font-weight="600">SPORTS</text>
       <text x="755" y="248" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#5a6080">COMPLEX</text>
 
-      <!-- Cafeteria -->
       <rect x="490" y="340" width="120" height="70" rx="6" fill="#201a15" stroke="#403025" stroke-width="1.5"/>
       <text x="550" y="371" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#8892b0" font-weight="600">🍽 CAFÉ</text>
       <text x="550" y="384" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#5a6080">Cafeteria</text>
 
-      <!-- Admin Block -->
       <rect x="100" y="380" width="90" height="80" rx="6" fill="#1e2235" stroke="#3b4268" stroke-width="1.5"/>
       <text x="145" y="416" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#8892b0" font-weight="600">ADMIN</text>
       <text x="145" y="429" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#5a6080">Block</text>
 
-      <!-- FOE -->
       <rect x="710" y="360" width="90" height="80" rx="6" fill="#1e2235" stroke="#3b4268" stroke-width="1.5"/>
       <text x="755" y="396" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#8892b0" font-weight="600">FOE</text>
       <text x="755" y="409" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#5a6080">Engineering</text>
 
-      <!-- ===== CLICKABLE PARKING ZONES: FCI, FOM, DTC ===== -->
-      <!-- FCI Parking – overlaid on FCI building area -->
+      <!-- Clickable Parking Zones -->
       <g id="map-zone-fci" class="map-zone clickable-zone" onclick="showZoneInfo('FCI')" style="cursor:pointer">
-        <!-- Animated glow ring -->
         <rect x="236" y="86" width="178" height="128" rx="10" fill="none" stroke="#3b82f6" stroke-width="1" stroke-dasharray="6,4" opacity="0.5">
           <animate attributeName="stroke-dashoffset" values="0;20" dur="2s" repeatCount="indefinite"/>
         </rect>
-        <!-- Main zone rect -->
         <rect x="240" y="90" width="170" height="120" rx="6" fill="rgba(59,130,246,0.08)" stroke="#3b82f6" stroke-width="2.5" class="zone-rect" data-zone="FCI"/>
-        <!-- Small corner badge bottom-right -->
         <rect x="338" y="184" width="64" height="20" rx="4" fill="#3b82f6"/>
         <text x="351" y="198" font-family="JetBrains Mono" font-size="9" fill="#fff">🅿 <tspan id="map-slots-fci">--/120</tspan></text>
       </g>
 
-      <!-- FOM Parking – overlaid on FOM building area -->
       <g id="map-zone-fom" class="map-zone clickable-zone" onclick="showZoneInfo('FOM')" style="cursor:pointer">
         <rect x="486" y="86" width="168" height="108" rx="10" fill="none" stroke="#f59e0b" stroke-width="1" stroke-dasharray="6,4" opacity="0.5">
           <animate attributeName="stroke-dashoffset" values="0;20" dur="2.4s" repeatCount="indefinite"/>
         </rect>
         <rect x="490" y="90" width="160" height="100" rx="6" fill="rgba(245,158,11,0.08)" stroke="#f59e0b" stroke-width="2.5" class="zone-rect" data-zone="FOM"/>
-        <!-- Small corner badge bottom-right -->
         <rect x="578" y="174" width="64" height="20" rx="4" fill="#f59e0b"/>
         <text x="591" y="188" font-family="JetBrains Mono" font-size="9" fill="#000">🅿 <tspan id="map-slots-fom">--/80</tspan></text>
       </g>
 
-      <!-- DTC Parking – overlaid on Chancellor Hall area -->
       <g id="map-zone-dtc" class="map-zone clickable-zone" onclick="showZoneInfo('DTC')" style="cursor:pointer">
         <rect x="356" y="376" width="158" height="98" rx="10" fill="none" stroke="#22c55e" stroke-width="1" stroke-dasharray="6,4" opacity="0.5">
           <animate attributeName="stroke-dashoffset" values="0;20" dur="1.8s" repeatCount="indefinite"/>
         </rect>
         <rect x="360" y="380" width="150" height="90" rx="6" fill="rgba(34,197,94,0.08)" stroke="#22c55e" stroke-width="2.5" class="zone-rect" data-zone="DTC"/>
-        <!-- Small corner badge bottom-right -->
         <rect x="448" y="452" width="54" height="20" rx="4" fill="#22c55e"/>
         <text x="461" y="466" font-family="JetBrains Mono" font-size="9" fill="#000">🅿 <tspan id="map-slots-dtc">--/100</tspan></text>
       </g>

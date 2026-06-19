@@ -1,49 +1,57 @@
-const BASE_URL = "http://172.19.244.63:5000";
+// ── API base URL ────────────────────────────────────────────────────────
+// Change this if your Flask server runs on a different host/port.
+const BASE_URL = "http://localhost:5000";
 
+// ── Zone name → zone_id mapping (matches database seed order) ──────────
+const ZONE_ID_MAP = { "FCI": 1, "FOM": 2, "DTC": 3 };
+const ZONE_KEY_MAP = { 1: "FCI", 2: "FOM", 3: "DTC" };
+
+// ── Mock fallback data ──────────────────────────────────────────────────
 const ZONES_MOCK = {
-  FCI: { name: 'FCI Parking', location: 'Faculty of Computing & Informatics', total: 120, available: 80 },
-  FOM: { name: 'FOM Parking', location: 'Faculty of Management',              total: 80,  available: 30 },
-  DTC: { name: 'DTC Parking', location: 'Grand Hall (DTC)',                   total: 100, available: 55 },
+  FCI: { name: 'FCI Parking', location: 'Faculty of Computing & Informatics', total: 120, available: 80, status: 'available' },
+  FOM: { name: 'FOM Parking', location: 'Faculty of Management',              total: 80,  available: 30, status: 'available' },
+  DTC: { name: 'DTC Parking', location: 'Chancellor Hall (DTC)',              total: 100, available: 55, status: 'available' },
 };
 
-// Live ZONES object — populated by fetchZones(), falls back to mock
+// Live ZONES object — keyed by FCI/FOM/DTC; populated by fetchZones()
 let ZONES = { ...ZONES_MOCK };
 
-// ── Fetch zone data from Flask API ──
+// ── Fetch zone data from Flask API ──────────────────────────────────────
 async function fetchZones() {
   try {
     const res = await fetch(`${BASE_URL}/api/zones/`);
     if (!res.ok) throw new Error('API error');
     const data = await res.json();
-    // Backend returns { success: true, data: [...] }
     if (data.success && Array.isArray(data.data)) {
+      // FIX: Map numeric zone_id → FCI/FOM/DTC key
       data.data.forEach(z => {
-        ZONES[z.zone_id] = {
-          name:      z.zone_name,
-          location:  z.location,
-          total:     z.total_slots,
-          available: z.available_slots,
-          status:    z.status
-        };
+        const key = ZONE_KEY_MAP[z.zone_id];
+        if (key) {
+          ZONES[key] = {
+            zone_id:   z.zone_id,
+            name:      z.zone_name,
+            location:  z.location,
+            total:     z.total_slots,
+            available: z.available_slots,
+            status:    z.status
+          };
+        }
       });
-    } else {
-      Object.assign(ZONES, data); // fallback for flat format
+      console.log('[ParkPredict] Zones loaded from API');
     }
-    console.log('[ParkPredict] Zones loaded from API');
   } catch (e) {
     console.warn('[ParkPredict] API unavailable, using mock data');
-    Object.assign(ZONES, ZONES_MOCK);
+    ZONES = { ...ZONES_MOCK };
   }
 }
 
-// ── Fetch prediction from Flask API ──
+// ── Fetch prediction from Flask API ─────────────────────────────────────
 async function fetchPrediction(day, hour, zone = 'all') {
   try {
     const res = await fetch(`${BASE_URL}/api/recommendation/?day=${encodeURIComponent(day)}&hour=${hour}&zone=${zone}`);
     if (!res.ok) throw new Error('API error');
     return await res.json();
   } catch (e) {
-    // Fallback to local PEAK_MODEL
     const zoneKey = (zone === 'all') ? null : zone;
     const dayData = zoneKey
       ? (PEAK_MODEL[zoneKey]?.[day] || getPeakModelAvg(day))
@@ -54,7 +62,7 @@ async function fetchPrediction(day, hour, zone = 'all') {
   }
 }
 
-// ── Fetch today's sessions from Flask API ──
+// ── Fetch active sessions from Flask API ─────────────────────────────────
 async function fetchSessions() {
   try {
     const res = await fetch(`${BASE_URL}/api/parking/active`);
@@ -67,12 +75,19 @@ async function fetchSessions() {
   }
 }
 
-// ── POST check-in to Flask API ──
+// ── POST check-in to Flask API ───────────────────────────────────────────
 async function apiCheckIn(payload) {
+  // FIX: convert zone name to zone_id integer for the backend
+  const zoneId = ZONE_ID_MAP[payload.zone] || parseInt(payload.zone) || payload.zone;
+  const body = {
+    zone_id:       zoneId,
+    user_id:       payload.student_id || payload.user_id,
+    vehicle_plate: payload.plate || payload.vehicle_plate,
+  };
   const res = await fetch(`${BASE_URL}/api/parking/checkin`, {
-    method: 'POST',
+    method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    body:    JSON.stringify(body)
   });
   if (!res.ok) {
     const err = await res.json();
@@ -81,12 +96,12 @@ async function apiCheckIn(payload) {
   return await res.json();
 }
 
-// ── POST check-out to Flask API ──
+// ── POST check-out to Flask API ──────────────────────────────────────────
 async function apiCheckOut(sessionId) {
   const res = await fetch(`${BASE_URL}/api/parking/checkout`, {
-    method: 'POST',
+    method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ log_id: sessionId })
+    body:    JSON.stringify({ log_id: parseInt(sessionId) })
   });
   if (!res.ok) {
     const err = await res.json();
@@ -95,7 +110,7 @@ async function apiCheckOut(sessionId) {
   return await res.json();
 }
 
-// ── Simulate live changes (used when API is offline) ──
+// ── Simulate live changes (fallback when API is offline) ─────────────────
 function simulateLiveChanges() {
   Object.keys(ZONES).forEach(k => {
     const z     = ZONES[k];
@@ -104,10 +119,11 @@ function simulateLiveChanges() {
   });
 }
 
-// ── Auto-refresh zones from API every 30 seconds ──
+// ── Auto-refresh zones every 30 seconds ──────────────────────────────────
 fetchZones();
 setInterval(fetchZones, 30000);
 
+// ── Utility helpers ───────────────────────────────────────────────────────
 function getZoneColor(pct) {
   if (pct > 0.5) return 'green';
   if (pct > 0.2) return 'yellow';
@@ -120,6 +136,7 @@ function getZoneLabel(pct) {
   return 'Full';
 }
 
+// ── Static chart data ─────────────────────────────────────────────────────
 const HOURLY_DATA = {
   today:     [22,55,78,82,75,70,88,92,85,72,60,45,38,28],
   yesterday: [18,50,72,80,70,65,82,88,80,68,55,42,35,25],
@@ -137,7 +154,6 @@ const SESSIONS_DATA = [
   { id: 'MMU-006', zone: 'DTC', vehicle: 'TUV 2345',  type: 'Car',        in: '10:00 AM', out: '–',        duration: '–',      status: 'active' },
 ];
 
-// Peak occupancy % by day/hour (7AM–8PM) — per zone
 const PEAK_MODEL = {
   FCI: {
     Monday:    [20,65,88,90,80,75,85,92,87,72,60,46,36,22],
@@ -186,4 +202,3 @@ if (typeof Chart !== 'undefined') {
   Chart.defaults.borderColor = '#1e2740';
   Chart.defaults.font.family = "'DM Sans', sans-serif";
 }
-
