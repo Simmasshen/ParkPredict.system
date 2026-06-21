@@ -103,11 +103,9 @@ function quickPredict() {
   const day = document.getElementById('qDay').value;
   const timeStr = document.getElementById('qTime').value;
   const hour = parseInt(timeStr);
-  const ampm = timeStr.includes('PM') && hour !== 12 ? 12 : 0;
-  const h = hour + ampm - 7; // offset to array index (7AM = 0)
-  const idx = Math.max(0, Math.min(13, h));
+  const idx = Math.max(0, Math.min(13, hour - 7)); // offset to array index (7AM = 0)
 
-  const data = PEAK_MODEL[day] || PEAK_MODEL['Monday'];
+  const data = getPeakModelAvg(day);
   const occupancy = data[idx];
   const probability = 100 - occupancy;
   const color = probability > 50 ? '#22c55e' : probability > 20 ? '#f59e0b' : '#ef4444';
