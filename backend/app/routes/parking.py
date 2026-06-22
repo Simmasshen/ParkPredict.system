@@ -1,6 +1,5 @@
 """
 ParkPredict — Parking Routes
-==============================
 Endpoints for check-in and check-out actions.
 
 Endpoints:
@@ -12,9 +11,36 @@ Endpoints:
 """
 
 from flask import Blueprint, request, jsonify
-from app.database import check_in, check_out, get_active_logs, get_logs_by_user
+from app.database import (
+    check_in, check_out, get_active_logs,
+    get_logs_by_user, get_all_zones,
+)
 
 parking_bp = Blueprint("parking", __name__)
+
+# Map zone name strings to zone IDs (matching seed data order)
+ZONE_NAME_MAP = {
+    "1": 1, "2": 2, "3": 3,
+    "A": 1, "B": 2, "C": 3,
+    "FCI": 1, "FOM": 2, "DTC": 3,
+    "Zone A": 1, "Zone B": 2, "Zone C": 3,
+}
+
+
+def _resolve_zone_id(value) -> int | None:
+    """Resolve zone_id from int, string number, or zone name."""
+    if value is None:
+        return None
+    if isinstance(value, int):
+        return value
+    # Try int cast first
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        pass
+    # Try name mapping
+    key = str(value).strip().upper()
+    return ZONE_NAME_MAP.get(key)
 
 
 @parking_bp.route("/checkin", methods=["POST"])
@@ -24,27 +50,28 @@ def checkin():
 
     Request body (JSON):
       { "zone_id": 1, "user_id": "S001", "vehicle_plate": "WXX1234" }
-
-    vehicle_plate is optional.
+    OR frontend format:
+      { "zone": "FCI", "student_id": "S001", "plate": "WXX1234", "vehicle_type": "Car" }
     """
     try:
         data = request.get_json()
-
-        # ── Validate request body ─────────────────────────────────────────
         if not data:
-            return jsonify({"success": False,
-                            "error": "Request body is required. Send JSON with zone_id and user_id."}), 400
+            return jsonify({"success": False, "error": "Request body is required."}), 400
 
-        zone_id       = data.get("zone_id")
-        user_id       = data.get("user_id")
-        vehicle_plate = data.get("vehicle_plate")
+        # Support both backend field names and frontend field names
+        zone_raw      = data.get("zone_id") or data.get("zone")
+        user_id       = data.get("user_id") or data.get("student_id")
+        vehicle_plate = data.get("vehicle_plate") or data.get("plate")
 
-        if not zone_id:
-            return jsonify({"success": False, "error": "zone_id is required."}), 400
+        if not zone_raw:
+            return jsonify({"success": False, "error": "zone_id (or zone) is required."}), 400
         if not user_id:
-            return jsonify({"success": False, "error": "user_id is required."}), 400
-        if not isinstance(zone_id, int):
-            return jsonify({"success": False, "error": "zone_id must be a number."}), 400
+            return jsonify({"success": False, "error": "user_id (or student_id) is required."}), 400
+
+        zone_id = _resolve_zone_id(zone_raw)
+        if zone_id is None:
+            return jsonify({"success": False,
+                            "error": f"Unknown zone '{zone_raw}'. Use zone_id 1–3 or names FCI/FOM/DTC."}), 400
 
         result      = check_in(zone_id=zone_id, user_id=str(user_id), vehicle_plate=vehicle_plate)
         status_code = 200 if result["success"] else 400
@@ -64,17 +91,17 @@ def checkout():
     """
     try:
         data = request.get_json()
-
         if not data:
-            return jsonify({"success": False,
-                            "error": "Request body is required. Send JSON with log_id."}), 400
+            return jsonify({"success": False, "error": "Request body is required."}), 400
 
         log_id = data.get("log_id")
-
         if not log_id:
             return jsonify({"success": False, "error": "log_id is required."}), 400
         if not isinstance(log_id, int):
-            return jsonify({"success": False, "error": "log_id must be a number."}), 400
+            try:
+                log_id = int(log_id)
+            except (ValueError, TypeError):
+                return jsonify({"success": False, "error": "log_id must be a number."}), 400
 
         result      = check_out(log_id=log_id)
         status_code = 200 if result["success"] else 400

@@ -1,88 +1,53 @@
 """
-ParkPredict — Database Bridge (Pirai → Nitesh)
-================================================
-This file connects Pirai's Flask backend to Nitesh's database project.
+ParkPredict — Database Bridge
+Connects the Flask backend to the database project.
 
 REQUIRED FOLDER STRUCTURE:
-    parkpredict/                  ← shared parent folder (any name is fine)
-    ├── backend/                  ← Pirai's project  (this folder)
+    parkpredict/
+    ├── backend/           ← Flask app
     │   ├── app.py
-    │   ├── requirements.txt
     │   └── app/
-    │       ├── __init__.py
-    │       ├── database.py       ← this file
-    │       ├── routes/
-    │       └── services/
-    └── database/                 ← Nitesh's project (must be named 'database')
+    │       └── database.py  ← this file
+    └── database/          ← Database project (must be named 'database')
         └── db/
-            ├── schema.py         ← must have: create_tables()
-            ├── seed.py           ← must have: seed_zones()
-            ├── operations.py     ← must have: check_in(), check_out()
-            ├── queries.py        ← must have: get_all_zones(), get_zone_by_id(),
-            │                                  get_active_logs(), get_logs_by_user(),
-            │                                  get_peak_hours(), get_prediction_data()
-            └── admin.py          ← must have: update_zone_status(), reset_zone_slots()
-
-HOW TO SET UP (both Pirai and Nitesh do this once):
-    1. Create a shared folder, e.g. C:/Users/pirai/Desktop/parkpredict/
-    2. Put Pirai's backend folder inside it   → parkpredict/backend/
-    3. Put Nitesh's database folder inside it → parkpredict/database/
-    4. Run from inside the backend folder:
-           cd parkpredict/backend
-           python app.py
+            ├── schema.py, seed.py, operations.py, queries.py, admin.py
 """
 
 import sys
 import os
 import sqlite3
 
-# Explicit module exports for clarity
 __all__ = [
-    "init_db",
-    "get_connection",
-    "create_tables",
-    "seed_zones",
-    "check_in",
-    "check_out",
-    "get_all_zones",
-    "get_zone_by_id",
-    "get_active_logs",
-    "get_logs_by_user",
-    "get_daily_stats",
-    "get_peak_hours",
+    "init_db", "get_connection",
+    "create_tables", "seed_zones",
+    "check_in", "check_out",
+    "get_all_zones", "get_zone_by_id",
+    "get_active_logs", "get_logs_by_user",
+    "get_daily_stats", "get_peak_hours",
     "get_prediction_data",
-    "update_zone_status",
-    "reset_zone_slots",
+    "update_zone_status", "reset_zone_slots",
+    "get_admin_logs", "get_capacity_history",
 ]
 
-# ── Locate Nitesh's database folder ───────────────────────────────────────
-# Goes up: database.py → app/ → backend/ → parkpredict/ → then into database/
+# ── Locate database folder ──────────────────────────────────────────────
+# Goes up: database.py → app/ → backend/ → project root/ → database/
 DB_PROJECT_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "database")
 DB_PROJECT_PATH = os.path.normpath(DB_PROJECT_PATH)
 
-# ── Friendly error if Nitesh's folder is missing ──────────────────────────
 if not os.path.isdir(DB_PROJECT_PATH):
     raise FileNotFoundError(
-        f"\n\n[ParkPredict] Cannot find Nitesh's database folder.\n"
+        f"\n\n[ParkPredict] Cannot find 'database' folder.\n"
         f"Expected it at: {DB_PROJECT_PATH}\n\n"
-        f"Make sure your folder structure looks like this:\n"
+        f"Folder structure must be:\n"
         f"  parkpredict/\n"
         f"  ├── backend/    ← you are here\n"
-        f"  └── database/   ← Nitesh's project (folder must be named 'database')\n"
+        f"  └── database/   ← database project\n"
     )
 
-if not os.path.isdir(os.path.join(DB_PROJECT_PATH, "db")):
-    raise FileNotFoundError(
-        f"\n\n[ParkPredict] Found Nitesh's database folder but no 'db/' subfolder inside it.\n"
-        f"Expected: {DB_PROJECT_PATH}/db/\n"
-        f"Tell Nitesh his db/ package must be directly inside the 'database/' folder.\n"
-    )
-
-# ── Add Nitesh's folder to Python path so we can import from it ───────────
 if DB_PROJECT_PATH not in sys.path:
     sys.path.insert(0, DB_PROJECT_PATH)
 
-# ── Import Nitesh's functions ──────────────────────────────────────────────
+# ── Import database functions ──────────────────────────────────────────
 try:
     from db.schema     import create_tables
     from db.seed       import seed_zones
@@ -96,50 +61,34 @@ try:
         get_peak_hours,
         get_prediction_data,
     )
-    from db.admin import update_zone_status, reset_zone_slots
-
+    from db.admin import (
+        update_zone_status,
+        reset_zone_slots,
+        get_admin_logs,
+        get_capacity_history,
+    )
 except ImportError as e:
     raise ImportError(
-        f"\n\n[ParkPredict] Connected to Nitesh's database folder but a required "
-        f"function is missing.\n"
-        f"Missing: {e}\n\n"
-        f"Send this message to Nitesh — his db/ package must export:\n"
-        f"  db/schema.py     → create_tables()\n"
-        f"  db/seed.py       → seed_zones()\n"
-        f"  db/operations.py → check_in(), check_out()\n"
-        f"  db/queries.py    → get_all_zones(), get_zone_by_id(), get_active_logs(),\n"
-        f"                     get_logs_by_user(), get_peak_hours(), get_prediction_data()\n"
-        f"  db/admin.py      → update_zone_status(), reset_zone_slots()\n"
+        f"\n\n[ParkPredict] Missing function in database project: {e}\n"
     )
 
 
 def init_db():
-    """Call once on app startup to create tables and seed default data."""
+    """Call once on app startup to create tables and seed data."""
     create_tables()
     seed_zones()
-    print("[DB] Connected to Nitesh's database. Ready.")
+    print("[DB] Database initialised and ready.")
 
 
-# ── SQLite Connection for Users Table ──────────────────────────────────────
+# ── Shared SQLite connection for the same DB ───────────────────────────
 def get_connection():
     """
-    Return a SQLite connection to the local users database.
-    
-    This is SEPARATE from Nitesh's parking database.
-    Used ONLY by app/services/auth.py to manage user accounts (login/register).
-    
-    Database file: backend/users.db
-    Tables: users (user_id, username, password_hash, student_id, email, created_at)
-    
-    Returns:
-        sqlite3.Connection — with row_factory set to sqlite3.Row for dict-like rows
-        
-    Note:
-        check_same_thread=False allows the connection to be used across Flask's
-        threading model (safe for this use case with proper connection management).
+    Return a SQLite connection to the shared parkpredict.db.
+    Used by auth service to store user accounts in the same database.
     """
-    db_path = os.path.join(os.path.dirname(__file__), "..", "users.db")
+    # Database is stored inside database/parkpredict.db
+    db_path = os.path.join(DB_PROJECT_PATH, "parkpredict.db")
     conn = sqlite3.connect(db_path, check_same_thread=False)
-    conn.row_factory = sqlite3.Row  # Makes rows behave like dicts
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn
-
