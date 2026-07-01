@@ -62,7 +62,8 @@ async function doCheckIn() {
   checkInInProgress = true;
   try {
     const result = await apiCheckIn({ student_id: studentId, plate, zone, vehicle_type: type });
-    activeSession = { studentId, plate, zone, type, startTime: now, sessionId: result.session_id };
+    const sessionId = result.session_id || result.log_id || result.data?.log_id || null;
+    activeSession = { studentId, plate, zone, type, startTime: now, sessionId };
   } catch (err) {
     console.warn('[ParkPredict] Check-in API failed, offline:', err.message);
     activeSession = { studentId, plate, zone, type, startTime: now, sessionId: null };
@@ -97,7 +98,7 @@ async function doCheckOut(isAuto = false) {
       z.available = Math.min(z.total, z.available + 1);
     }
   } catch (err) {
-    console.warn('[ParkPredict] Check-out API failed:', err.message);
+    console.warn('[ParkPredict]  No sessionId stored — checkout not sent to backend', err.message);
   }
 
   updateLastActivityRow(now, dur);
