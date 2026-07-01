@@ -1,4 +1,4 @@
-# ParkPredict — Database Project
+# ParkPredict — Database Project (Nitesh)
 
 SQLite database layer for ParkPredict. Owns the schema, seed data, and all read/write logic for parking zones, check-in/check-out sessions, admin actions, and user accounts.
 
