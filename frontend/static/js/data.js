@@ -1,6 +1,6 @@
 // ── API base URL ────────────────────────────────────────────────────────
 // Change this if your Flask server runs on a different host/port.
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = "http://10.215.100.63:5000";
 
 // ── Zone name → zone_id mapping (matches database seed order) ──────────
 const ZONE_ID_MAP = { "FCI": 1, "FOM": 2, "DTC": 3 };
@@ -93,7 +93,7 @@ async function apiCheckIn(payload) {
     const err = await res.json();
     throw new Error(err.error || 'Check-in failed');
   }
-  return await res.json();
+  const data = await res.json();
 }
 
 // ── POST check-out to Flask API ──────────────────────────────────────────
